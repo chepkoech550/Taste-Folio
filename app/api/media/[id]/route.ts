@@ -1,0 +1,3 @@
+import { db,env,owner } from '../../../../lib/server';
+export const dynamic='force-dynamic';
+export async function GET(req:Request,{params}:{params:Promise<{id:string}>}){const {id}=await params;if(!/^[a-f0-9-]{36}$/.test(id))return new Response('Not found',{status:404});const a=await db().prepare('SELECT * FROM assets WHERE id=?').bind(id).first<any>();if(!a||(!a.published&&a.owner_id!==await owner()))return new Response('Not found',{status:404});const object=await env.BUCKET?.get(a.object_key);if(!object)return new Response('Not found',{status:404});return new Response(object.body,{headers:{'Content-Type':a.content_type,'X-Content-Type-Options':'nosniff','Cache-Control':'private, max-age=0, must-revalidate'}})}
