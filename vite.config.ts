@@ -6,8 +6,8 @@ import { configureToolEnvironment } from "./scripts/tool-environment.mjs";
 import { sites } from "./scripts/vite/sites-vite-plugin";
 import { connectorPreview } from "./scripts/vite/connector-preview-plugin.mjs";
 
-const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
-  "00000000-0000-4000-8000-000000000000";
+const TASTE_FOLIO_DATABASE_ID =
+  "49a2578e-5716-4758-9ec4-779b49b16f01";
 
 const { d1, r2 } = hostingConfig;
 
@@ -22,8 +22,8 @@ const localBindingConfig = {
     ? [
         {
           binding: d1,
-          database_name: "site-creator-d1",
-          database_id: SITE_CREATOR_PLACEHOLDER_DATABASE_ID,
+          database_name: "taste-folio-db",
+          database_id: TASTE_FOLIO_DATABASE_ID,
         },
       ]
     : [],
