@@ -29,10 +29,13 @@ test('account forms use secure cookies, labels and a restrictive CSP',async()=>{
  assert.match(html,/autocomplete="new-password"/);assert.match(html,/minlength="12"/);
  assert.match(r.response.headers.get('set-cookie'),/Secure; HttpOnly; SameSite=Lax/);
  assert.match(r.response.headers.get('content-security-policy'),/frame-ancestors 'none'/);
+ // no-referrer can turn browser navigation form POST Origin into null.
+ assert.equal(r.response.headers.get('referrer-policy'),'same-origin');
 });
 test('rejects cross origin, missing CSRF, oversized forms and unsupported methods before provider calls',async()=>{
  const fetcher=()=>{throw Error('must not call provider')};
  assert.equal((await authenticateRequest(post('/auth/sign-in',{}, {Origin:'https://evil.test'}),env,fetcher)).response.status,403);
+ assert.equal((await authenticateRequest(post('/auth/sign-in',{}, {Origin:'null'}),env,fetcher)).response.status,403);
  assert.equal((await authenticateRequest(post('/auth/sign-in',{csrf:'wrong'}),env,fetcher)).response.status,403);
  assert.equal((await authenticateRequest(post('/auth/sign-in',{password:'x'.repeat(5000)}),env,fetcher)).response.status,413);
  assert.equal((await authenticateRequest(new Request(root+'/auth/sign-in',{method:'DELETE'}),env,fetcher)).response.status,405);

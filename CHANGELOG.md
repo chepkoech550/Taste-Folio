@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Fix browser signup and sign in forms by preserving same-origin request metadata.
+  Cross-origin and opaque-origin requests remain rejected.
+
 ### Standalone Cloudflare authentication
 
 - Email/password account pages, secure cookie sessions, provider verification and refresh.
