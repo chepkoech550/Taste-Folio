@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## Unreleased\n\n### Mentor handover, 16 November 2026\n\n- Add MENTOR.md and make the README an index of current status and review needs.\n- Update architecture, testing, roadmap, setup and demo docs for Cloudflare and Supabase.\n- Distinguish user-reported progress, local tests, public Flash failures and the untested authenticated invoice path.\n- Document proposed Flash runtime names without claiming the code reads them yet.
 
 - Fix browser signup and sign in forms by preserving same-origin request metadata.
   Cross-origin and opaque-origin requests remain rejected.
@@ -10,7 +10,7 @@
 - Email/password account pages, secure cookie sessions, provider verification and refresh.
 - CSRF-protected account forms, safe redirects, sign out and forged-header rejection.
 - Updated ownership integration tests to use verified sessions.
-- Runtime Supabase configuration and live user testing are still required.
+- Supabase runtime values configured; owner reports profile creation. Broader live user testing is pending.
 
 ### Implemented
 

@@ -47,9 +47,9 @@ This typechecks, builds, then runs an isolated integration suite. The tests crea
 
 For the standalone GitHub deployment use [Cloudflare setup](CLOUDFLARE.md).
 
-The original Sites project is identified by `.openai/hosting.json`. Preserve that identity and its `DB`/`BUCKET` bindings when updating the live app. Publishing uses the authenticated Sites workflow to build, synchronise source, save a version and deploy it. GitHub pushes do not currently deploy the Site automatically.
+The original Sites project is identified by `.openai/hosting.json`. Preserve that identity and its `DB`/`BUCKET` bindings when updating the live app. Publishing uses the authenticated Sites workflow to build, synchronise source, save a version and deploy it. GitHub pushes deploy the standalone Cloudflare app through Workers Builds; they do not update that separate Sites preview.
 
-Website access remains private until the owner explicitly changes the audience. Repository visibility does not control website access.
+The original Sites preview remains private. The standalone Cloudflare app has its own access configuration. Repository visibility does not control website access.
 
 ## Credentials
 

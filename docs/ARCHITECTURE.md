@@ -1,41 +1,85 @@
 # Architecture
 
-## Application
+## Runtime and data
 
-Taste Folio uses React, Vinext and a Cloudflare Worker. Routes under `app/` serve the interface and API. `lib/portfolio.ts` defines portfolio validation rules shared between the browser and server.
+Taste Folio uses React and Vinext on a standalone Cloudflare Worker. It began from
+the Sites starter; the current GitHub deployment is connected to Cloudflare.
+The original private Sites preview has a separate source and authentication gateway.
 
-## User journey
+| Component | Responsibility |
+| --- | --- |
+| React, app routes and Vinext | Portfolio UI, server rendering and API handlers |
+| Cloudflare Worker | Request handling and trusted identity boundary |
+| Supabase Auth | Account credentials, verified identity and session renewal |
+| Cloudflare D1 | Portfolio drafts, published snapshots and image ownership |
+| Cloudflare R2 | Uploaded image bytes |
+| Flash | Intended invoice/status provider; not integrated into the running app |
 
-1. Write an introduction and skills.
-2. Add project case studies and identify the skills demonstrated.
-3. Add a contact method, with optional services and payment receiving information.
-4. Review the portfolio and publish a version.
+## Authentication
 
-The public-facing portfolio includes project evidence, experience, credentials and contact links. Skills linked to projects are labelled as shown in those projects; that label is not independent verification.
+In production, `worker/index.ts` calls `authenticateRequest` from
+`lib/standalone-auth.mjs`. It removes visitor-supplied `oai-authenticated-*`
+headers, verifies the session with Supabase `/user`, and sets identity headers
+only from the provider-verified account. Expired access can renew through a
+refresh token and is verified again.
 
-## Records
+`app/chatgpt-auth.ts` retains its starter filename. On the standalone app it reads
+the verified identity supplied by the Worker. `lib/server.ts` supplies the owner
+ID used by portfolio and media handlers. Browser state does not authorize writes.
 
-D1 `portfolios` stores one record per signed-in user, including a stable slug, private draft JSON and a separate published JSON snapshot. Editing or saving a draft does not replace the published snapshot. Publishing replaces the snapshot; unpublishing removes it while keeping the draft.
+Account forms use same-origin checks, CSRF tokens and host-only Secure/HttpOnly
+cookies. Their Referrer-Policy is `same-origin`, preserving the Origin header on
+native browser form submissions. Account-specific responses bypass shared caches.
+Local development may use loopback-only simulated identity.
 
-D1 `assets` stores upload ownership and whether each image is referenced by the current published portfolio. R2 stores image bytes. Draft images are owner-only. Publishing exposes the images referenced by that version; unpublishing or removing an image from the published version revokes anonymous access on subsequent requests.
+## User journey and records
+
+1. Add an introduction, skills and optional experience/credentials.
+2. Describe project context, role, contribution, outcome and supporting work.
+3. Add contact details, with optional services, rates and receiving information.
+4. Review and publish a portfolio version.
+
+D1 `portfolios` stores one record per user, with a stable slug, private draft JSON
+and separate published JSON snapshot. Saving a draft does not replace the published
+snapshot. Publishing replaces it; unpublishing keeps the draft.
+
+D1 `assets` stores image ownership and publication state. R2 stores image bytes.
+Draft images are owner-only. Publishing exposes images referenced by the published
+version. Unpublishing or removing an image from that version revokes anonymous
+access on subsequent requests.
 
 ## Routes
 
 | Route | Purpose | Access |
 | --- | --- | --- |
-| `/` | Browse/search published portfolios | Subject to Site audience |
-| `/edit` | Portfolio editor | Writing requires sign in |
-| `/p/[slug]` | Published portfolio | Subject to Site audience |
-| `GET /api/portfolio` | Current user's draft and publication state | Owner |
-| `POST /api/portfolio` | Save, publish or unpublish current user's portfolio | Owner + origin check |
-| `GET /api/profiles` | Published portfolio collection | Subject to Site audience |
-| `POST /api/upload` | Upload an owned project or profile image | Signed in + origin check |
-| `GET /api/media/[id]` | Read an image | Owner or published image, within Site audience |
+| `/` | Browse and search portfolios | Public app route; verify live access separately |
+| `/edit` | Editor and local drafting | Account required for server saves, uploads and publishing |
+| `/p/[slug]` | Published portfolio | Published snapshot |
+| `/auth/sign-in`, `/auth/sign-up` | Account forms | Public; POST requires origin and CSRF checks |
+| `/auth/sign-out` | Sign out confirmation | POST clears session |
+| `/signin-with-chatgpt` | Legacy sign in link | Routed to standalone account flow in production |
+| `GET /api/portfolio` | Owner's draft and publication state | Signed-in owner |
+| `POST /api/portfolio` | Save, publish or unpublish | Signed-in owner and origin check |
+| `GET /api/profiles` | Published portfolio collection | Public app handler |
+| `POST /api/upload` | Upload a photo | Signed-in user and origin check |
+| `GET /api/media/[id]` | Image bytes | Owner or currently published image |
 
-## Boundaries
+## Validation and limits
 
-Sites owns sign in and injects identity headers. Server handlers enforce ownership; browser state is not an authorization mechanism. The Site's current private audience also restricts visitors to published pages.
+`lib/portfolio.ts` shares validation between browser and server. Uploads accept
+JPG, PNG and WebP under 5 MB, with a 60-upload-per-owner MVP limit. File signatures
+are checked. Publishing rejects references to another user's assets. Evidence
+links must use HTTPS.
 
-Image uploads allow JPG, PNG and WebP under 5 MB, with a sixty upload per owner MVP limit. The app checks file signatures and rejects references to another user's assets. Portfolio evidence links must use HTTPS.
+Skills, qualifications, outcomes and portfolio claims are supplied by the user.
+The platform does not independently verify credentials.
 
-M-Pesa and Lightning details are display-only. There is no payment provider integration or payment ledger. Flash invoice creation and server-confirmed status tracking are planned.
+## Payment boundary
+
+M-Pesa and Lightning receiving information is display-only. The current code has
+no payment ledger, Flash client, automatic invoice or payout handler.
+
+The desired BTC flow is client wallet to professional wallet, with provider-confirmed
+receipt. An API key authenticates access to its owning Flash account; it does not
+establish authority to spend every portfolio user's funds. Platform-funded payouts
+must be designed separately. [Flash status and evidence](FLASH.md).

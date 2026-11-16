@@ -70,6 +70,28 @@ Flash user docs still describe receiving and holding Bitcoin. Public API docs
 still describe the BTC recipient-invoice mutation. This conflicts with the probe
 response, so runtime support must be confirmed before enabling checkout.
 
+## Authenticated key path still to test
+
+Only endpoint URLs have been supplied. No Flash API key is configured. Flash
+documents keys in the format `fk_<keyId>_<secret>`, created through an authenticated
+user session with `apiKeyCreate`. Server requests use `X-API-KEY`; session tokens
+use Authorization. Obtain the minimum permissions for the chosen operations.
+
+The separate authenticated `lnInvoiceCreate` operation is documented to create
+an invoice for the caller's wallet. It has not been tested here. The public
+recipient-invoice error does not establish its behaviour. An account-scoped
+invoice paid into the key owner's wallet is not automatically a payment into
+another professional's wallet; verify the recipient before designing the checkout.
+
+The proposed Cloudflare names `FLASH_API_URL` and `FLASH_API_KEY` are not read by
+the current application. API credentials must be set privately in the runtime,
+not in portfolio fields, GitHub or chat.
+
+Client tipping means a client pays an invoice from their own wallet. Sending
+rewards or tips from Taste Folio through `lnInvoicePaymentSend` spends from a
+funded account controlled by that key. That is a separate payout and funding
+flow. No payout endpoint is currently implemented.
+
 ## Required next information
 
 The owner supplied a valid production receiving address, which also returned

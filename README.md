@@ -1,98 +1,123 @@
 # Taste Folio
 
-Repository: [chepkoech550/Taste-Folio](https://github.com/chepkoech550/Taste-Folio)
-
 **Your skills, supported by your work.**
 
-Taste Folio helps independent professionals create a portfolio that clients and employers can understand. People explain their contribution to projects, connect skills to evidence, add experience and credentials, and publish a stable portfolio link.
+Taste Folio helps independent professionals publish credible portfolios they can
+share with clients and employers. A portfolio explains what someone does, shows
+their contribution to real projects, connects skills to evidence, and provides
+clear service, rate and contact information.
 
-Initial user examples: an indoor plant stylist, a lash technician and a fashion designer.
+Initial users: an indoor plant stylist, a lash technician and a fashion designer.
+Product direction: Viola Kipkorir. Visual identity: maroon and gold.
 
-## Project status
+**[Open the Cloudflare app](https://taste-folio.violakorir24.workers.dev/) ·
+[Mentor: start here](MENTOR.md) · [Flash investigation](docs/FLASH.md)**
 
-Hackathon MVP in development. The standalone Cloudflare deployment is:
+## Current status
 
-[Open Taste Folio on Cloudflare](https://taste-folio.violakorir24.workers.dev)
+Updated 16 November 2026. This is a hackathon MVP in active development.
 
-Email/password authentication has been implemented and requires the runtime
-configuration in [Cloudflare setup](docs/CLOUDFLARE.md). Live authentication
-has not yet been verified.
-
-The original private Sites preview is:
-
-[Open Taste Folio](https://ownwork-creative-portfolios.indigo-plum-6650.chatgpt.site)
-
-The preview requires access to the Site. Repository visibility and website access are separate settings. A public GitHub repository alone does not make the app or portfolio links public.
-
-| Working | Planned or pending |
+| Area | Current evidence |
 | --- | --- |
-| Four section portfolio editor | Flash Lightning checkout |
-| Projects with role, contribution, outcome, photo and evidence link | Payment status confirmation |
-| Skills mapped to project examples | External user testing and documented feedback |
-| Experience and credential fields | Public website access after review |
-| Account saved drafts and separate published versions | Backup demo recording and final pitch |
-| Stable portfolio links and reversible unpublishing | Project licence selection |
-| Search, email/WhatsApp links and print/PDF layout | Submission release |
-| Optional M-Pesa and Lightning receiving details | Automated M-Pesa processing is outside the current MVP |
+| Cloudflare hosting | Deployment reported Ready; account pages were independently loaded |
+| D1 database and R2 uploads bucket | Created; initial database tables applied successfully |
+| Supabase authentication | Connected; signup origin error fixed; owner reports creating a profile |
+| Portfolio editor and publication | Implemented; draft, publication and ownership flows pass isolated integration tests |
+| Project evidence, skills, experience and credentials | Implemented |
+| Services, rates, email and WhatsApp | Implemented |
+| M-Pesa and Lightning receiving details | Display and copy only |
+| Flash automatic invoices and payment confirmation | Pending API credentials, verified BTC support and implementation |
+| Live testing with all three initial users | Pending |
+| Project licence | Not selected |
 
-Qualifications, results and work descriptions are supplied by the professional. Taste Folio does not independently verify them or guarantee employment.
+The owner's successful profile creation is a user report. It does not establish
+that every production upload, publication, email or account recovery flow has
+been tested. [Testing](docs/TESTING.md) distinguishes automated and live evidence.
 
-## Start here
+## Help needed from a mentor
 
-- [Local setup](docs/SETUP.md)
-- [How the app works](docs/ARCHITECTURE.md)
-- [MVP roadmap and acceptance criteria](docs/ROADMAP.md)
-- [Testing](docs/TESTING.md)
-- [Demo and submission checklist](docs/DEMO.md)
-- [Contributing](CONTRIBUTING.md)
-- [Security](SECURITY.md)
-- [Changelog](CHANGELOG.md)
+1. Confirm how to obtain an authenticated Flash API key and a matching test account.
+2. Verify the supported BTC invoice operation. The public recipient-invoice call
+   rejected a valid production BTC recipient with
+   `Flash does not support BTC wallets.`.
+3. Review the standalone authentication boundary and test with two accounts.
+4. Help ship one complete client payment or tip journey, with the correct recipient
+   and provider-confirmed receipt.
 
-## Quick start
+The private authenticated invoice operation has **not** been tested. The public
+operation's failure does not establish that every Flash BTC API route is unavailable.
+Both supplied endpoints reported `mainnet`; a testing hostname is not proof of test coins.
 
-Requires Node.js 22.13 or later and npm. Node.js 22 is the CI baseline.
+Start with [MENTOR.md](MENTOR.md) for a bounded review, entry points and next tasks.
+
+## Run locally
+
+Requires Node.js 22.13 or later, npm and Git. Node.js 22 is the CI baseline.
 
 ```sh
 npm ci
 npm run build
 ```
 
-Before running the development app, apply the existing database migration as described in [SETUP.md](docs/SETUP.md). The app uses Cloudflare D1 and R2 through the Sites runtime.
+Apply the initial migration once to a fresh local database using
+[SETUP.md](docs/SETUP.md), then:
 
 ```sh
 npm run dev
 ```
 
-On a normal local machine, the starter offers simulated sign in for loopback development. The standalone Cloudflare deployment verifies Supabase accounts server-side. Do not expose local mock authentication to the internet. See [Cloudflare setup](docs/CLOUDFLARE.md).
-
-To run the automated checks:
+Local loopback development can use the starter's simulated identity. Production
+uses verified Supabase sessions. Keep mock authentication local.
 
 ```sh
 npm run check
 ```
 
-## Source map
+This runs TypeScript checks, a production build, authentication tests and portfolio
+integration tests. Tests use isolated storage and a simulated auth provider.
+
+## Find your way around
 
 | Location | Purpose |
 | --- | --- |
-| `app/` | Pages, portfolio interface and API routes |
-| `lib/` | Shared validation, portfolio types and server helpers |
-| `db/` | Database schema |
-| `drizzle/` | Versioned database migrations |
-| `tests/` | Integration checks in an isolated Worker environment |
-| `docs/` | Setup, architecture, roadmap and demo guidance |
-| `.github/` | CI, issue forms and pull request template |
-| `worker/`, `scripts/`, `vendor/` | Runtime and starter infrastructure |
-| `.openai/hosting.json` | Existing Site identity and storage binding names |
+| [MENTOR.md](MENTOR.md) | Handover, priorities and review checklist |
+| [docs/SETUP.md](docs/SETUP.md) | Local development |
+| [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md) | Deployment and runtime configuration |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Authentication, data flow and routes |
+| [docs/FLASH.md](docs/FLASH.md) | Payment scope, observed errors and missing credentials |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Remaining MVP work and completion criteria |
+| [docs/TESTING.md](docs/TESTING.md) | Checks, evidence and live acceptance tasks |
+| [docs/DEMO.md](docs/DEMO.md) | Demo and submission preparation |
+| [app/ownwork.tsx](app/ownwork.tsx) | Portfolio interface; filename retains the earlier project name |
+| [lib/portfolio.ts](lib/portfolio.ts) | Shared validation and portfolio types |
+| [lib/standalone-auth.mjs](lib/standalone-auth.mjs) | Standalone authentication and account pages |
+| [worker/index.ts](worker/index.ts) | Worker entry and trusted identity boundary |
+| [db/schema.ts](db/schema.ts), [drizzle/](drizzle/) | Data schema and migration |
+| [tests/](tests/) | Auth and portfolio checks |
 
-## Payments
+## Deployment and payments
 
-M-Pesa and Lightning fields currently display receiving information for payments made in the client’s own app. There is no Flash invoice creation, automatic payment confirmation, STK Push or escrow yet. See the [roadmap](docs/ROADMAP.md) for the planned Lightning journey.
+GitHub `main` is connected to Cloudflare Workers Builds. This project uses
+Vinext and a Worker, rather than the standard Next.js deployment expected by the
+earlier Vercel setup. Generated Worker configuration is in `dist/server/wrangler.json`.
 
-## Authorship and licences
+The original Sites preview is historical and remains separate:
+https://ownwork-creative-portfolios.indigo-plum-6650.chatgpt.site
 
-Product concept and direction: **Viola Kipkorir**. OpenAI ChatGPT/Codex assisted with interface design, implementation and debugging. AI assistance is disclosed for the hackathon.
+There is no Flash checkout, payment ledger, automated payout, automatic M-Pesa
+processing, escrow or independent credential verification yet. Receiving details
+alone do not confirm that a payment was made. Publishing does not guarantee employment.
 
-A licence for the original project code has **not been selected**. The repository should not be described as open source until an appropriate licence is added. Dependencies and starter code retain their existing licences and notices. See [third-party notices](THIRD_PARTY_NOTICES.md).
+## Access, authorship and licence
 
-Never commit API keys, wallet recovery phrases, PINs or private customer data.
+The repository is private as checked on 16 November 2026. Invite a mentor as a
+collaborator before sharing code links. Website access and repository visibility
+are separate.
+
+OpenAI ChatGPT/Codex assisted with design, implementation and debugging. A licence
+for original project code is still pending; retain all dependency and starter
+notices. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md),
+[SECURITY.md](SECURITY.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Keep API keys, passwords, PINs, recovery phrases and private customer data out of
+source, issues and shared screenshots.

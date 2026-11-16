@@ -1,51 +1,73 @@
 # MVP roadmap
 
-Keep work focused on the complete journey: publish evidence of a skill, share the portfolio, enquire about a service and pay through a supported Lightning flow.
+Updated 16 November 2026. The next goal is one complete portfolio journey followed
+by a verified client Bitcoin payment or tip. Keep one active coding task at a time.
 
-Use one GitHub issue for each item below. Move work through **To do → In progress → Review → Done**. One active coding issue at a time is enough for the solo MVP.
+## Completed or reported
 
-## P0 · Verify the published portfolio journey
+- [x] Cloudflare hosting connected to GitHub.
+- [x] D1 and R2 created; initial schema applied.
+- [x] Supabase authentication connected.
+- [x] Signup origin bug fixed and corrected header verified live.
+- [x] Owner reports successful profile creation.
+- [x] Local auth and portfolio integration checks pass.
+- [x] Public Flash BTC invoice failure investigated and documented.
 
-- [ ] Create a real portfolio with permission to share its images.
-- [ ] Save, reload and confirm the draft survives.
-- [ ] Publish, edit the draft, then confirm the published page stays unchanged until republishing.
-- [ ] Open the link on another authorized device.
-- [ ] Resolve the private website audience before giving links to external testers or judges.
+These completion marks identify the evidence above. They do not replace the
+remaining production acceptance checks.
 
-Done when a tester can understand the professional's contribution and contact them from the portfolio.
+## P0: mentor and Flash access
 
-## P0 · Integrate Flash Lightning checkout
+- [ ] Give the mentor access to the private repository.
+- [ ] Obtain an authenticated Flash API key and matching environment account.
+- [ ] Confirm BTC settlement and the supported authenticated invoice operation.
+- [ ] Confirm why both supplied endpoints report mainnet.
+- [ ] Verify required scopes and the receiving wallet for each professional.
 
-- [ ] Obtain test access and confirm supported account/wallet setup.
-- [ ] Decide and document which wallet receives each professional's payment.
-- [ ] Keep provider credentials server-side.
-- [ ] Create an invoice for one clearly priced service.
-- [ ] Show the invoice and supported wallet action.
-- [ ] Confirm payment through the provider; do not trust a client-side “paid” click.
-- [ ] Handle unpaid, expired and failed requests with a retry path.
-- [ ] Demonstrate the complete journey in the test environment.
+Done when one authorised BTC invoice can be generated with its amount, recipient,
+currency, network and expiry verified. [Investigation](FLASH.md).
 
-Done when a test payment is matched to the correct service and recipient, and the UI accurately shows its status.
+## P0: verify the portfolio live
 
-## P0 · Test with the three initial users
+- [ ] Save and reload a real draft with permitted project images.
+- [ ] Publish, edit the draft and confirm the public snapshot remains unchanged.
+- [ ] Republish, open on another device and unpublish.
+- [ ] Test two-account isolation and unpublished image access.
+- [ ] Confirm email delivery and session renewal for the intended pilot.
+
+Done when a visitor can understand the professional's contribution and contact
+them, and accounts remain isolated.
+
+## P0: implement client payments or tips
+
+- [ ] Create one invoice for a clearly agreed amount credited to the professional.
+- [ ] Store the recipient and payment attempt server-side.
+- [ ] Show QR/invoice and a supported wallet action.
+- [ ] Confirm PAID only from the provider.
+- [ ] Handle unpaid, expired, failed and duplicate requests.
+- [ ] Run an explicitly agreed funded demonstration on the verified network.
+
+This work is not implemented yet. It depends on the access and BTC operation
+checks above. Platform-funded rewards and payouts are a separate future flow.
+
+## P0: three-user pilot
 
 - [ ] Indoor plant stylist.
 - [ ] Lash technician.
 - [ ] Fashion designer.
-- [ ] Record the task, observed difficulty and resulting fix.
-- [ ] Obtain permission for anything shown during judging.
+- [ ] Record observed difficulty and the resulting fix.
+- [ ] Obtain permission for content shown to judges.
 
-Done when each user can create a portfolio and a visitor can identify the work, role, service and contact path.
+## Submission
 
-## P0 · Prepare the submission
+- [ ] Confirm organisers' latest deadlines and required public access.
+- [ ] Select a project licence and retain third-party notices.
+- [ ] Verify clean-checkout setup and configuration instructions.
+- [ ] Review source/history for credentials before any visibility change.
+- [ ] Prepare pitch and playable backup recording.
+- [ ] Tag the tested submission commit with its actual limitations.
 
-- [ ] Public repository by the organiser's deadline.
-- [ ] Select a project licence.
-- [ ] Validate setup instructions from a clean checkout.
-- [ ] Confirm no credentials or private customer data are in source/history.
-- [ ] Prepare the organiser's pitch template and a backup demo video.
-- [ ] Tag the tested submission commit and record actual limitations.
+## Deferred
 
-## Deliberately deferred
-
-Messaging, reviews, rankings, scheduling, hiring algorithms, automatic M-Pesa processing, escrow and credential verification.
+Messaging, reviews, rankings, scheduling, hiring algorithms, automated M-Pesa
+processing, escrow, wallet custody and independent credential verification.

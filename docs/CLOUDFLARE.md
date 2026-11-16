@@ -13,7 +13,7 @@ Build command: `npm run build`.
 Deploy command: `npx wrangler deploy`.
 The Cloudflare Vite plugin generates `dist/server/wrangler.json`.
 
-## Connect authentication
+## Current account setup\n\nAs of 16 November 2026, the owner has created D1/R2, applied the initial schema,\nconfigured the two Supabase runtime values and reported successful profile\ncreation. The signup origin bug is fixed. Do not recreate resources or reapply\nthe initial migration on the existing database. The steps below are for review\nand fresh environments.\n\n## Connect authentication
 
 The standalone Worker now supports Supabase email/password authentication. Its
 account pages use the maroon and gold brand. Until configuration is present,
@@ -46,9 +46,7 @@ identity headers are removed before setting any provider-verified identity.
 Responses bypass shared caching. Sign out clears browser cookies and attempts
 provider session revocation; existing access tokens follow provider expiry rules.
 
-Authentication tests use a simulated provider. Real signup, email delivery,
-refresh and account isolation on the deployed site must still be tested after
-configuration. Password recovery UI and CAPTCHA are not implemented. Before
+Authentication tests use a simulated provider. The owner reported successful\nprofile creation after configuration. Email delivery, refresh and two-account\nisolation still need broader live acceptance tests. Password recovery UI and CAPTCHA are not implemented. Before
 broader launch, add those and review auth rate limits and SMTP capacity.
 
 No extra D1 migration is required for authentication. Supabase supplies stable
@@ -56,3 +54,11 @@ user IDs for the existing owner_id columns. No portfolios existed on the new D1
 before this integration, so there is no identity migration in this deployment.
 
 The original Sites-hosted source and audience are unchanged by this GitHub update.
+
+## Flash configuration is still proposed
+
+`FLASH_API_URL` (variable) and `FLASH_API_KEY` (secret) are the proposed runtime
+names. The current application does not read them yet. Adding them alone will
+not enable payments. No Flash API key has been supplied or configured in this work.
+Authenticate with a key for the matching Flash environment and implement the
+server integration only after verifying BTC operation support. [Flash evidence](FLASH.md).
