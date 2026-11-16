@@ -1,19 +1,15 @@
 import handler from "vinext/server/fetch-handler";
+import { authenticateRequest, withSessionCookies } from "../lib/standalone-auth.mjs";
 import { runWithConnectorBinding } from "../lib/connector-context";
 import type { ConnectorBinding } from "../lib/connector-contract.mjs";
 
 const worker = {
-  fetch(request: Request, env: Cloudflare.Env, ctx: ExecutionContext<{ CONNECTORS?: ConnectorBinding }>) {
-    // This repository deploys directly to Cloudflare, outside the Sites gateway.
-    // Until standalone authentication is configured, public requests must never
-    // supply a trusted Sites identity. Keep local loopback development unchanged.
-    if (!import.meta.env.DEV) {
-      const headers = new Headers(request.headers);
-      for (const name of [...headers.keys()]) {
-        if (name.toLowerCase().startsWith("oai-authenticated-")) headers.delete(name);
-      }
-      request = new Request(request, { headers });
-    }
+  async fetch(request: Request, env: Cloudflare.Env, ctx: ExecutionContext<{ CONNECTORS?: ConnectorBinding }>) {
+    const auth = import.meta.env.DEV
+      ? { request, cookies: [] }
+      : await authenticateRequest(request, env);
+    if (auth.response) return auth.response;
+    request = auth.request || request;
     let binding = ctx.props?.CONNECTORS;
     // Local preview emulates the same request-scoped capability. This branch and
     // the auxiliary service binding are absent from production builds.
@@ -33,7 +29,8 @@ const worker = {
         },
       };
     }
-    return runWithConnectorBinding(binding, () => handler.fetch(request, env, ctx));
+    const response = await runWithConnectorBinding(binding, () => handler.fetch(request, env, ctx));
+    return import.meta.env.DEV ? response : withSessionCookies(response, auth.cookies);
   },
 };
 

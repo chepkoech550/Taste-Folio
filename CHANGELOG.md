@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Standalone Cloudflare authentication
+
+- Email/password account pages, secure cookie sessions, provider verification and refresh.
+- CSRF-protected account forms, safe redirects, sign out and forged-header rejection.
+- Updated ownership integration tests to use verified sessions.
+- Runtime Supabase configuration and live user testing are still required.
+
 ### Implemented
 
 - Guided portfolio editor with introduction, project evidence, work/contact and publication review.

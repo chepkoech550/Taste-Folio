@@ -10,7 +10,15 @@ Initial user examples: an indoor plant stylist, a lash technician and a fashion 
 
 ## Project status
 
-Hackathon MVP in development. The current app is deployed as a private preview:
+Hackathon MVP in development. The standalone Cloudflare deployment is:
+
+[Open Taste Folio on Cloudflare](https://taste-folio.violakorir24.workers.dev)
+
+Email/password authentication has been implemented and requires the runtime
+configuration in [Cloudflare setup](docs/CLOUDFLARE.md). Live authentication
+has not yet been verified.
+
+The original private Sites preview is:
 
 [Open Taste Folio](https://ownwork-creative-portfolios.indigo-plum-6650.chatgpt.site)
 
@@ -55,7 +63,7 @@ Before running the development app, apply the existing database migration as des
 npm run dev
 ```
 
-On a normal local machine, the starter offers simulated sign in for loopback development. The hosted app uses Sites authentication. Do not expose local mock authentication to the internet.
+On a normal local machine, the starter offers simulated sign in for loopback development. The standalone Cloudflare deployment verifies Supabase accounts server-side. Do not expose local mock authentication to the internet. See [Cloudflare setup](docs/CLOUDFLARE.md).
 
 To run the automated checks:
 

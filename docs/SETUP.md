@@ -33,7 +33,7 @@ npm run dev
 
 Open the URL printed by the development server. On a portable local setup, visit `/signin-with-chatgpt?return_to=/edit` to use the starter's loopback-only development identity. Managed Sites previews do not enable mock sign in.
 
-The production authentication gateway provides the signed-in user headers. The app authorizes writes against that identity. Deploying behind an arbitrary server that trusts client-supplied identity headers is unsafe; preserve the Sites gateway.
+The standalone production Worker verifies Supabase sessions before setting trusted identity headers. The app authorizes writes against that verified identity. Follow [Cloudflare setup](CLOUDFLARE.md) for runtime settings. The original Sites preview has its own gateway.
 
 ## Check
 
@@ -45,7 +45,9 @@ This typechecks, builds, then runs an isolated integration suite. The tests crea
 
 ## Deploy
 
-The existing Sites project is identified by `.openai/hosting.json`. Preserve that identity and its `DB`/`BUCKET` bindings when updating the live app. Publishing uses the authenticated Sites workflow to build, synchronise source, save a version and deploy it. GitHub pushes do not currently deploy the Site automatically.
+For the standalone GitHub deployment use [Cloudflare setup](CLOUDFLARE.md).
+
+The original Sites project is identified by `.openai/hosting.json`. Preserve that identity and its `DB`/`BUCKET` bindings when updating the live app. Publishing uses the authenticated Sites workflow to build, synchronise source, save a version and deploy it. GitHub pushes do not currently deploy the Site automatically.
 
 Website access remains private until the owner explicitly changes the audience. Repository visibility does not control website access.
 
