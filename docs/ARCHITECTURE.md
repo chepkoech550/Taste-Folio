@@ -54,7 +54,7 @@ access on subsequent requests.
 | --- | --- | --- |
 | `/` | Browse and search portfolios | Public app route; verify live access separately |
 | `/edit` | Editor and local drafting | Account required for server saves, uploads and publishing |
-| `/p/[slug]` | Published portfolio | Published snapshot |
+| `/p/[slug]` | Published portfolio | Published snapshot |\n| `/p/[slug]/card` | QR download and business-card printing | Published snapshot only; unpublished returns 404 |
 | `/auth/sign-in`, `/auth/sign-up` | Account forms | Public; POST requires origin and CSRF checks |
 | `/auth/sign-out` | Sign out confirmation | POST clears session |
 | `/signin-with-chatgpt` | Legacy sign in link | Routed to standalone account flow in production |
@@ -83,3 +83,15 @@ The desired BTC flow is client wallet to professional wallet, with provider-conf
 receipt. An API key authenticates access to its owning Flash account; it does not
 establish authority to spend every portfolio user's funds. Platform-funded payouts
 must be designed separately. [Flash status and evidence](FLASH.md).
+
+## QR sharing and tipping actions
+
+An optional acceptTips field lives in portfolio JSON; no schema migration is needed.
+A tipping profile expands receiving details through Leave a tip and labels its
+contact action Book me. It creates no invoice or payment confirmation.
+
+CardStudio uses qrcode.react locally, with a white quiet zone. lib/portfolio-links.ts
+supplies the canonical production URL so printed codes never point to previews.
+Only published name, headline, contact and tipping status reach the card page.
+The browser prints ten 85 x 55 mm cards on A4; visitors can also download the QR SVG.
+See [SHARING.md](SHARING.md).

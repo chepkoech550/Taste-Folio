@@ -67,3 +67,17 @@ payment separately with the agreed payer, recipient, amount and fees.
 Passing local checks does not verify real email delivery, provider payments,
 all browser layouts or employment outcomes. Use illustrative data in public
 issues and obtain permission for identifiable photos or payment details.
+
+## QR and tipping checks
+
+The expanded integration suite checks tip profiles require receiving details,
+Book me and Leave a tip render, cards reflect the published snapshot rather than
+a newer draft, unpublished cards return 404, and payment receiving addresses are
+not included in card output. No extra account or payment provider is involved.
+
+During implementation, the generated card QR was independently decoded at 330px
+and 106px to verify the canonical production URL. Browser checks verified the
+SVG download event, opening tip details and the live card route for the owner's
+published portfolio. Physical print output and narrow-phone acceptance should
+still be checked before printing a batch. The cloud browser did not surface a
+native print dialog for inspection.

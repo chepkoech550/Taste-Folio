@@ -10,7 +10,7 @@ by a verified client Bitcoin payment or tip. Keep one active coding task at a ti
 - [x] Supabase authentication connected.
 - [x] Signup origin bug fixed and corrected header verified live.
 - [x] Owner reports successful profile creation.
-- [x] Local auth and portfolio integration checks pass.
+- [x] Local auth and portfolio integration checks pass.\n- [x] Published QR SVG downloads and business-card print layout added and deployed.\n- [x] Optional tipping action uses existing receiving details without adding a payment backend.
 - [x] Public Flash BTC invoice failure investigated and documented.
 
 These completion marks identify the evidence above. They do not replace the
