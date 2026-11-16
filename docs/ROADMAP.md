@@ -1,6 +1,6 @@
 # MVP roadmap
 
-Updated 16 November 2026. The next goal is one complete portfolio journey followed
+Updated 16 November 2026. The next goal is one complete pitch, offer and enquiry journey followed
 by a verified client Bitcoin payment or tip. Keep one active coding task at a time.
 
 ## Completed or reported
@@ -10,7 +10,7 @@ by a verified client Bitcoin payment or tip. Keep one active coding task at a ti
 - [x] Supabase authentication connected.
 - [x] Signup origin bug fixed and corrected header verified live.
 - [x] Owner reports successful profile creation.
-- [x] Local auth and portfolio integration checks pass.\n- [x] Published QR SVG downloads and business-card print layout added and deployed.\n- [x] Optional tipping action uses existing receiving details without adding a payment backend.
+- [x] Value-first pitch and up to three offers implemented.\n- [x] Offer-specific enquiries, server-rendered discovery and legacy service compatibility implemented.\n- [x] Local auth and expanded integration checks pass.\n- [x] Published QR SVG downloads and business-card print layout added and deployed.\n- [x] Optional tipping action uses existing receiving details without adding a payment backend.
 - [x] Public Flash BTC invoice failure investigated and documented.
 
 These completion marks identify the evidence above. They do not replace the

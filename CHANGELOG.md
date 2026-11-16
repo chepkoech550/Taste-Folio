@@ -1,6 +1,17 @@
 # Changelog
 
-## Unreleased\n\n### QR business cards and simple tipping\n\n- Generate a production portfolio QR code and download it as SVG.\n- Print ten 85 x 55 mm business cards on A4 from the published snapshot.\n- Add one optional Accept tips toggle; Leave a tip expands existing receiving details.\n- Use Book me for tipping profiles and keep share actions under one menu.\n- Keep video evidence in existing project links; omit extra designers and customisation forms.\n- Validate tipping requirements, unpublished card access and published snapshot separation.\n- Decode generated QR codes at small and print resolutions; verify download and tip actions in preview.\n\n### Mentor handover, 16 November 2026\n\n- Add MENTOR.md and make the README an index of current status and review needs.\n- Update architecture, testing, roadmap, setup and demo docs for Cloudflare and Supabase.\n- Distinguish user-reported progress, local tests, public Flash failures and the untested authenticated invoice path.\n- Document proposed Flash runtime names without claiming the code reads them yet.
+## Unreleased
+
+### Express value: pitch, offers and opportunity
+
+- Lead public pages with a person's pitch and specific offers, then supporting work.
+- Add up to three structured offers and offer-specific email/WhatsApp enquiries.
+- Reorder the editor to Your pitch, Your offers, Proof & contact, Review & publish.
+- Render discovery on the server and search needs across offers, skills and pitch.
+- Add clearly labelled examples, including the street saxophonist.
+- Preserve legacy service/rate records, draft/publication separation and printed QR links.
+- Test empty/incomplete/excess offers, enquiry destinations and legacy compatibility.
+\n\n### QR business cards and simple tipping\n\n- Generate a production portfolio QR code and download it as SVG.\n- Print ten 85 x 55 mm business cards on A4 from the published snapshot.\n- Add one optional Accept tips toggle; Leave a tip expands existing receiving details.\n- Use Book me for tipping profiles and keep share actions under one menu.\n- Keep video evidence in existing project links; omit extra designers and customisation forms.\n- Validate tipping requirements, unpublished card access and published snapshot separation.\n- Decode generated QR codes at small and print resolutions; verify download and tip actions in preview.\n\n### Mentor handover, 16 November 2026\n\n- Add MENTOR.md and make the README an index of current status and review needs.\n- Update architecture, testing, roadmap, setup and demo docs for Cloudflare and Supabase.\n- Distinguish user-reported progress, local tests, public Flash failures and the untested authenticated invoice path.\n- Document proposed Flash runtime names without claiming the code reads them yet.
 
 - Fix browser signup and sign in forms by preserving same-origin request metadata.
   Cross-origin and opaque-origin requests remain rejected.

@@ -1,13 +1,15 @@
 # Taste Folio
 
-**Your skills, supported by your work.**
+**Express your value. Make an offer. Give people a way to work with you.**
 
-Taste Folio helps independent professionals publish credible portfolios they can
-share with clients and employers. A portfolio explains what someone does, shows
-their contribution to real projects, connects skills to evidence, and provides
-clear service, rate and contact information.
+Taste Folio is a platform where people pitch what their skills make possible.
+A person explains who they help, publishes up to three clear offers, supports
+those offers with work, and gives visitors a direct way to enquire or tip.
 
-Initial users: an indoor plant stylist, a lash technician and a fashion designer.
+The core journey is **pitch → offers → proof → opportunity**. A portfolio of work
+supports the pitch. The public experience leads with what someone can do for you.
+
+Use cases: an indoor plant stylist, a lash stylist, a fashion designer and a street saxophonist.
 Product direction: Viola Kipkorir. Visual identity: maroon and gold.
 
 **[Open the Cloudflare app](https://taste-folio.violakorir24.workers.dev/) ·
@@ -24,7 +26,7 @@ Updated 16 November 2026. This is a hackathon MVP in active development.
 | Supabase authentication | Connected; signup origin error fixed; owner reports creating a profile |
 | Portfolio editor and publication | Implemented; draft, publication and ownership flows pass isolated integration tests |
 | Project evidence, skills, experience and credentials | Implemented |
-| Services, rates, email and WhatsApp | Implemented |
+| Pitch and up to three specific offers | Implemented, with title, benefit/scope and optional price |\n| Offer-specific email and WhatsApp enquiries | Implemented |\n| Discovery by need, skill, name or place | Implemented; public listings render on the server |
 | M-Pesa and Lightning receiving details | Display and copy; optional Leave a tip action |\n| QR sharing and business cards | QR SVG download and ten-card A4 print sheet, from published profiles |
 | Flash automatic invoices and payment confirmation | Pending API credentials, verified BTC support and implementation |
 | Live testing with all three initial users | Pending |
@@ -34,7 +36,7 @@ The owner's successful profile creation is a user report. It does not establish
 that every production upload, publication, email or account recovery flow has
 been tested. [Testing](docs/TESTING.md) distinguishes automated and live evidence.
 
-## Share a portfolio in person\n\nPublish a portfolio, then choose **Get QR code & business card** in Review & publish.\nDownload the QR SVG for your own cards or signs, or print the supplied business-card sheet.\nIn Work & contact, **Accept tips for my work** adds a tip action using the receiving\ndetails already supported. Performance clips use project evidence links.\n[Sharing and printing guide](docs/SHARING.md).\n\n## Help needed from a mentor
+## Express value and share it\n\nPublish a portfolio, then choose **Get QR code & business card** in Review & publish.\nDownload the QR SVG for your own cards or signs, or print the supplied business-card sheet.\nIn Proof & contact, **Accept tips for my work** adds a tip action using the receiving\ndetails already supported. Performance clips use project evidence links. Existing services/rates appear as a legacy offer; saved data and /p/ links remain compatible.\n[Sharing and printing guide](docs/SHARING.md).\n\nSee [the product direction](docs/PRODUCT.md) for the value-first flow and data compatibility.\n\n## Help needed from a mentor
 
 1. Confirm how to obtain an authenticated Flash API key and a matching test account.
 2. Verify the supported BTC invoice operation. The public recipient-invoice call

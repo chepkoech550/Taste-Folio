@@ -81,3 +81,16 @@ SVG download event, opening tip details and the live card route for the owner's
 published portfolio. Physical print output and narrow-phone acceptance should
 still be checked before printing a batch. The cloud browser did not surface a
 native print dialog for inspection.
+
+## Pitch and offer checks
+
+The value-first integration tests verify that offers precede proof on public pages,
+the enquiry link names the selected offer, empty/incomplete offers cannot be
+published, more than three offers are rejected, and legacy service/rate records
+still display. Explicitly empty offer arrays do not resurrect old services.
+The home page renders published offer information on the server.
+
+Manual acceptance: write one pitch, add an offer, select its enquiry action,
+search by a need mentioned in an offer, review the saxophonist example, then
+confirm the existing published link and QR card still work. Messages, bookings
+and payments are not submitted by these UI checks.

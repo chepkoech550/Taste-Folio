@@ -9,13 +9,17 @@ Updated 16 November 2026.
 
 ## What I am building
 
-A shareable portfolio that helps a professional communicate their skills through
-work they can explain and stand behind. Users describe a project, their own role,
-contribution and outcome, then publish skills, services, rates and contact details.
+A platform for expressing value. People make a pitch, explain what someone can
+come to them for, and show work supporting those offers. Visitors discover people
+by what they need, enquire about a specific offer, or support work with a tip.
 
-The first examples are an indoor plant stylist, a lash technician and a fashion
-designer. The owner is building this for a hackathon and is learning development.
-Keep the review practical and focus on one complete user journey.
+The editor now has four steps: Your pitch, Your offers, Proof & contact, Review &
+publish. A person can publish up to three offers with a title, description and
+optional price. Evidence, skills and credentials support the offer lower down.
+
+The use cases include an indoor plant stylist, lash stylist, fashion designer
+and street saxophonist. Keep the review focused on one complete opportunity journey.
+[Product direction and compatibility](docs/PRODUCT.md).
 
 ## Where we are
 
@@ -81,10 +85,9 @@ checks. Session renewal is server-side.
 Review two-account isolation, session expiry, email delivery and the production
 configuration. Password recovery UI and CAPTCHA are not implemented.
 
-### 3. Verify the portfolio journey live
+### 3. Verify the pitch and offer journey live
 
-Use [the acceptance checklist](docs/TESTING.md). Confirm that a professional can
-save, upload, publish and share a portfolio, and that another account cannot edit
+Use [the acceptance checklist](docs/TESTING.md). Confirm that a professional can\nwrite a pitch, add an offer, save, upload, publish and share it, and that another account cannot edit
 their draft or access unpublished images.
 
 ## Suggested review session

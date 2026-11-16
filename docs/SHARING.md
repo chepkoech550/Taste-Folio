@@ -6,7 +6,7 @@ There is no separate poster designer, custom tip message or card editing form.
 
 ## For the portfolio owner
 
-1. In Work & contact, add M-Pesa or Lightning receiving details.
+1. In Proof & contact, add M-Pesa or Lightning receiving details.
 2. Turn on Accept tips for my work if wanted. At least one receiving method is
    required before publishing a tipping profile.
 3. Add a performance clip through a project's evidence link.
@@ -15,10 +15,10 @@ There is no separate poster designer, custom tip message or card editing form.
 
 ## For a visitor
 
-The QR opens the portfolio. A tipping profile shows Leave a tip and Book me.
+The QR opens the portfolio. A pitch leads with offers and offer-specific Enquire actions, with Leave a tip when enabled.
 Leave a tip expands the receiving details; the visitor chooses an amount and pays
-in their wallet. Booking opens the professional's email or WhatsApp contact.
-Share portfolio keeps copy, QR and print actions together in one collapsed menu.
+in their wallet. An offer enquiry opens the professional's email or WhatsApp contact.
+Share this pitch keeps copy, QR and print actions together in one collapsed menu.
 Taste Folio does not create a payment prompt, process a tip or confirm payment.
 Flash checkout remains a separate pending integration.
 

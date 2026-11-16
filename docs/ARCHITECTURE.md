@@ -34,10 +34,23 @@ Local development may use loopback-only simulated identity.
 
 ## User journey and records
 
-1. Add an introduction, skills and optional experience/credentials.
-2. Describe project context, role, contribution, outcome and supporting work.
-3. Add contact details, with optional services, rates and receiving information.
-4. Review and publish a portfolio version.
+1. Express value in a headline and short pitch.
+2. Add one to three offers: what someone gets and an optional price.
+3. Add work supporting the offer, contact details and optional receiving details.
+4. Review and publish the pitch.
+
+The database name and /p/ route remain unchanged for compatibility. The public page
+leads with pitch and offers; evidence and optional background follow. Each Enquire
+action includes the selected offer in an email or WhatsApp message.
+
+The optional offers array lives in the existing JSON. lib/offers.ts reads absent
+arrays as legacy service/rate records and prepares them for editing, limiting the derived description to 600 characters while preserving the original pitch. An explicit
+empty array means the user removed the offers and cannot silently resurrect a
+legacy service. Publishing requires one clear offer. No D1 migration is required.
+
+Home renders published listings on the server and passes them to the client for
+need-based filtering. Search considers offers, pitch, skills, name and location.
+Illustrative examples are separated from real published people.
 
 D1 `portfolios` stores one record per user, with a stable slug, private draft JSON
 and separate published JSON snapshot. Saving a draft does not replace the published
