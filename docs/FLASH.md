@@ -59,8 +59,12 @@ Both endpoints returned a top-level GraphQL error:
 
 The error extension identified the public service. This documents the observed
 recipient-invoice path; it does not prove every Flash app or authenticated wallet
-operation is unavailable. A valid authorised BTC recipient and organiser guidance
-are needed to verify the intended path. No authenticated user wallet was tested.
+operation is unavailable. A subsequent check with the owner's supplied receiving account resolved both a
+BTC wallet and a USD wallet on the production endpoint. The default wallet was
+USD. A 21-sat, 10-minute invoice request explicitly addressed to that valid BTC
+wallet returned the same 'Flash does not support BTC wallets.' error. No invoice
+was returned and no payment was sent. The test endpoint did not recognise this
+receiving account. No private authenticated wallet operation was tested.
 
 Flash user docs still describe receiving and holding Bitcoin. Public API docs
 still describe the BTC recipient-invoice mutation. This conflicts with the probe
@@ -68,7 +72,8 @@ response, so runtime support must be confirmed before enabling checkout.
 
 ## Required next information
 
-Obtain the professional's Flash receiving username/address and confirmation from
+The owner supplied a valid production receiving address, which also returned
+LNURL-pay metadata. The identity is omitted here. Confirm from
 Flash or the organisers of the supported BTC invoice endpoint, operation,
 recipient account requirements and required permissions. Ask:
 
