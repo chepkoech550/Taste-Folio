@@ -25,7 +25,7 @@ Updated 16 November 2026. This is a hackathon MVP in active development.
 | Portfolio editor and publication | Implemented; draft, publication and ownership flows pass isolated integration tests |
 | Project evidence, skills, experience and credentials | Implemented |
 | Services, rates, email and WhatsApp | Implemented |
-| M-Pesa and Lightning receiving details | Display and copy only |
+| M-Pesa and Lightning receiving details | Display and copy; optional Leave a tip action |\n| QR sharing and business cards | QR SVG download and ten-card A4 print sheet, from published profiles |
 | Flash automatic invoices and payment confirmation | Pending API credentials, verified BTC support and implementation |
 | Live testing with all three initial users | Pending |
 | Project licence | Not selected |
@@ -34,7 +34,7 @@ The owner's successful profile creation is a user report. It does not establish
 that every production upload, publication, email or account recovery flow has
 been tested. [Testing](docs/TESTING.md) distinguishes automated and live evidence.
 
-## Help needed from a mentor
+## Share a portfolio in person\n\nPublish a portfolio, then choose **Get QR code & business card** in Review & publish.\nDownload the QR SVG for your own cards or signs, or print the supplied business-card sheet.\nIn Work & contact, **Accept tips for my work** adds a tip action using the receiving\ndetails already supported. Performance clips use project evidence links.\n[Sharing and printing guide](docs/SHARING.md).\n\n## Help needed from a mentor
 
 1. Confirm how to obtain an authenticated Flash API key and a matching test account.
 2. Verify the supported BTC invoice operation. The public recipient-invoice call

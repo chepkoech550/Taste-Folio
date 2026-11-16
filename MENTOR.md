@@ -25,7 +25,7 @@ Keep the review practical and focus on one complete user journey.
 - The owner reports successful profile creation after that fix.
 - The editor, image access, draft/published separation and owner isolation pass
   local integration checks.
-- M-Pesa and Lightning addresses are currently displayed and copied.
+- M-Pesa and Lightning addresses are displayed and copied; optional tipping exposes those same details.\n- Published profiles have QR SVG downloads and a printable business-card sheet.\n- Review the added card route and print UI using [SHARING.md](docs/SHARING.md).
 - Flash invoice generation, checkout and payment confirmation remain unimplemented.
 
 The latest application-code check passed before the documentation-only updates:

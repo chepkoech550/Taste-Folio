@@ -28,11 +28,18 @@ try{
  assert((await call('/api/profiles')).value.profiles.some(x=>x.slug===slug&&x.profile.name==='QA Portfolio'));
  let other=await call('/api/portfolio','GET',undefined,otherIdentity);assert.equal(other.value.portfolio,null);
  await call('/api/portfolio','POST',{profile:{...p,name:'Edited draft'},action:'draft'},identity);assert.equal((await call('/api/profiles')).value.profiles.find(x=>x.slug===slug).profile.name,'QA Portfolio');
+ const beforeCard=await mf.dispatchFetch(root+'/p/'+slug+'/card');assert.equal(beforeCard.status,200);const beforeCardHtml=await beforeCard.text();assert(beforeCardHtml.includes('QA Portfolio'));assert(!beforeCardHtml.includes('Edited draft'));assert(beforeCardHtml.includes('Print 10 cards'));assert(beforeCardHtml.includes('Download QR as SVG'));
  const page=await mf.dispatchFetch(root+'/p/'+slug);assert.equal(page.status,200);assert((await page.text()).includes('Selected work'));
  const file=new File([Uint8Array.from(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aXioAAAAASUVORK5CYII=','base64'))],'pixel.png',{type:'image/png'});let form=new FormData();form.append('file',file);const uploadRequest=new Request(root+'/api/upload',{method:'POST',headers:identity,body:form});let uploaded=await mf.dispatchFetch(root+'/api/upload',{method:'POST',headers:Object.fromEntries(uploadRequest.headers),body:await uploadRequest.arrayBuffer()});let uploadResult=await uploaded.json();assert.equal(uploaded.status,200,JSON.stringify(uploadResult));let {url}=uploadResult;assert.equal((await mf.dispatchFetch(root+url)).status,404);assert.equal((await mf.dispatchFetch(root+url,{headers:identity})).status,200);
  assert.equal((await call('/api/portfolio','POST',{profile:{...p,avatar:url},action:'publish'},otherIdentity)).r.status,400);
  p.projects[0].image=url;assert.equal((await call('/api/portfolio','POST',{profile:p,action:'publish'},identity)).r.status,200);assert.equal((await mf.dispatchFetch(root+url)).status,200);
  await call('/api/portfolio','POST',{profile:p,action:'unpublish'},identity);assert(!(await call('/api/profiles')).value.profiles.some(x=>x.slug===slug));assert.equal((await mf.dispatchFetch(root+url)).status,404);
+ assert.equal((await mf.dispatchFetch(root+'/p/'+slug+'/card')).status,404);
+ assert.equal((await call('/api/portfolio','POST',{profile:{...p,acceptTips:true},action:'publish'},identity)).r.status,400);
+ p={...p,acceptTips:true,lightning:'artist@example.test'};p.projects[0].link='https://example.com/performance';
+ assert.equal((await call('/api/portfolio','POST',{profile:p,action:'publish'},identity)).r.status,200);
+ const performerPage=await mf.dispatchFetch(root+'/p/'+slug);const performerHtml=await performerPage.text();assert(performerHtml.includes('Leave a tip'));assert(performerHtml.includes('Book me'));assert(performerHtml.includes('https://example.com/performance'));assert(performerHtml.includes('QR code &amp; business card'));
+ const performerCard=await mf.dispatchFetch(root+'/p/'+slug+'/card');const cardHtml=await performerCard.text();assert.equal(performerCard.status,200);assert(cardHtml.includes('Work · Tips · Bookings'));assert(cardHtml.includes('https://taste-folio.violakorir24.workers.dev/p/'+slug));assert(!cardHtml.includes('artist@example.test'));
  assert.equal((await call('/api/portfolio','POST',{profile:{...p,projects:[{...p.projects[0],link:'javascript:alert(1)'}]},action:'draft'},identity)).r.status,400);
- console.log('Passed: auth, origin checks, publish validation, drafts, published snapshots, owner isolation, SSR portfolios, image upload/access, unpublishing and unsafe-link rejection.');
+ console.log('Passed: auth, origin checks, publish validation, drafts, published snapshots, owner isolation, SSR portfolios, image upload/access, unpublishing, tipping validation, performer actions, public card snapshot boundaries and unsafe-link rejection.');
 }finally{await mf.dispose()}

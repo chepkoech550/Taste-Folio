@@ -8,3 +8,5 @@ Taste Folio contains original project code and starter infrastructure. No licenc
 - Viola Kipkorir supplied the product concept, user needs and direction. OpenAI ChatGPT/Codex assisted with design, implementation and debugging.
 
 Before describing the repository as open source, select an appropriate project licence and review the obligations of the bundled starter code and dependencies.
+
+- QR generation uses qrcode.react 4.2.0 under the ISC licence. Its notice is retained in [vendor/qrcode.react-LICENSE.txt](vendor/qrcode.react-LICENSE.txt).
