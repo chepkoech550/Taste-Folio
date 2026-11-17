@@ -1,5 +1,12 @@
 # Changelog
 
+## Private Flash Bitcoin invoice pilot
+
+- Added an owner-only, fixed-recipient 21-sat invoice test and provider status lookup.
+- Verified key wallet ownership before requesting an invoice; kept invoice strings private in R2.
+- Added conditional reservations to avoid duplicate creation and ambiguous automatic retries.
+- Public offer checkout remains disabled until live invoice support is confirmed.
+
 ## Flash connection runtime fix
 
 - Replaced an unsupported Cloudflare redirect mode that prevented the check from reaching Flash. Redirects remain blocked without forwarding credentials.

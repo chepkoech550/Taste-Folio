@@ -8,7 +8,17 @@ const authPool=fetchMock.get('https://test-project.supabase.co');
 for(const [token,id,email] of [['qa-owner','qa-portfolio-owner','qa@example.test'],['qa-other','qa-other','other@example.test'],['qa-legacy','qa-legacy','legacy@example.test']]) authPool.intercept({path:'/auth/v1/user',method:'GET',headers:{authorization:'Bearer '+token}}).reply(200,{id,email}).persist();
 authPool.intercept({path:'/auth/v1/token?grant_type=password',method:'POST'}).reply(200,{access_token:'qa-owner',refresh_token:'qa-refresh',expires_in:3600}).persist();
 const flashPool=fetchMock.get('https://api.flashapp.me');
-flashPool.intercept({path:'/graphql',method:'POST',headers:{'x-api-key':'fk_integration_fixture'}}).reply(200,{data:{me:{defaultAccount:{wallets:[{walletCurrency:'BTC',id:'private-fixture-wallet'}]}}}}).persist();
+flashPool.intercept({path:'/graphql',method:'POST',headers:{'x-api-key':'fk_integration_fixture'}}).reply(200,{data:{me:{defaultAccount:{wallets:[{walletCurrency:'BTC',id:'private-fixture-wallet'}]}}}});
+// Miniflare passes streaming request bodies to Undici. Ordered one-shot replies
+// cover the connection, recipient lookup and creation; the status reply persists.
+for (const [operation,data] of [
+ ['recipient',{me:{defaultAccount:{wallets:[{id:'pilot-btc',walletCurrency:'BTC'}]}},recipient:{id:'pilot-btc',walletCurrency:'BTC'},globals:{network:'mainnet'}}],
+ ['create',{lnInvoiceCreate:{errors:[],invoice:{paymentRequest:'lnbc210n1fixture',satoshis:21}}}],
+ ['status',{lnInvoicePaymentStatus:{errors:[],status:'PENDING'}}],
+]) {
+ const mock=flashPool.intercept({path:'/graphql',method:'POST',headers:{'x-api-key':'fk_integration_fixture'}}).reply(200,{data});
+ if(operation==='status')mock.persist();
+}
 const options=unstable_getMiniflareWorkerOptions('dist/server/wrangler.json');
 const rootDir=dirname(options.main);const files=readdirSync(rootDir,{recursive:true}).filter(f=>/\.m?js$/.test(f)&&f!=='index.js');const modules=['index.js',...files].map(f=>({type:'ESModule',path:resolve(rootDir,f)}));const mf=new Miniflare({...options.workerOptions,modules,modulesRoot:rootDir,cf:false,fetchMock,bindings:{...options.workerOptions.bindings,SUPABASE_URL:'https://test-project.supabase.co',SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test',FLASH_API_URL:'https://api.flashapp.me/graphql',FLASH_API_KEY:'fk_integration_fixture'}});
 try{
@@ -62,6 +72,25 @@ try{
  const legacySaved=await call('/api/portfolio','POST',{profile:legacy,action:'publish'},{Cookie:'__Host-tf-access=qa-legacy'});assert.equal(legacySaved.r.status,200,JSON.stringify(legacySaved.value));
  const legacyPage=await mf.dispatchFetch(root+'/p/'+legacySaved.value.slug);const legacyHtml=await legacyPage.text();assert(legacyHtml.includes('Legacy plant offer'));assert(legacyHtml.includes('KSh 2,000'));
  assert.equal((await call('/api/portfolio','POST',{profile:{...legacy,offers:[]},action:'publish'},{Cookie:'__Host-tf-access=qa-legacy'})).r.status,400);
+ // Only the fixed pilot owner can create or inspect a private invoice.
+ assert.equal((await call('/api/flash/invoice-test','POST',{action:'create'},{Origin:root})).r.status,401);
+ assert.equal((await call('/api/flash/invoice-test','POST',{action:'create'},identity)).r.status,403);
+ assert.equal((await call('/api/flash/invoice-test','POST',{action:'create'},{...otherIdentity,Origin:root})).r.status,403);
+ await db.prepare('UPDATE portfolios SET slug=? WHERE owner_id=?').bind('viola-korir-dcd4b1a1','qa-portfolio-owner').run();
+ const privateSettings=await mf.dispatchFetch(root+'/settings/flash',{headers:identity});
+ assert((await privateSettings.text()).includes('Create 21-sat test invoice'));
+ assert.equal((await call('/api/flash/invoice-test','POST',{action:'send'},{...identity,Origin:root})).r.status,400);
+ const testInvoice=await call('/api/flash/invoice-test','POST',{action:'create'},{...identity,Origin:root});
+ assert.equal(testInvoice.r.status,200,JSON.stringify(testInvoice.value));
+ assert.equal(testInvoice.value.status,'created',JSON.stringify(testInvoice.value));
+ assert.equal(testInvoice.value.paymentStatus,'PENDING');
+ assert(!JSON.stringify(testInvoice.value).includes('lnbc'));
+ const testInvoiceAgain=await call('/api/flash/invoice-test','POST',{action:'create'},{...identity,Origin:root});
+ assert.equal(testInvoiceAgain.value.paymentStatus,'PENDING');
+ assert.equal((await call('/api/flash/invoice-test','POST',{action:'status'},{...otherIdentity,Origin:root})).r.status,403);
+ const bucket=await mf.getR2Bucket('BUCKET');
+ const privateRecord=await bucket.get('internal/flash-invoice-test/qa-portfolio-owner.json');
+ assert(privateRecord);assert((await privateRecord.json()).paymentRequest==='lnbc210n1fixture');
  console.log('Passed: auth, origin checks, publish validation, drafts, published snapshots, owner isolation, SSR portfolios, image upload/access, unpublishing, tipping validation, offer validation and enquiry links, legacy service compatibility, server-rendered discovery, performer actions, public card snapshot boundaries and unsafe-link rejection.');
 }finally{await mf.dispose()}
 

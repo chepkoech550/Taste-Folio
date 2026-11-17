@@ -108,3 +108,8 @@ supplies the canonical production URL so printed codes never point to previews.
 Only published name, headline, contact and tipping status reach the card page.
 The browser prints ten 85 x 55 mm cards on A4; visitors can also download the QR SVG.
 See [SHARING.md](SHARING.md).
+
+
+## Private Flash invoice pilot
+
+The owner-only invoice diagnostic uses the existing private R2 binding for one fixed-recipient test record, outside the assets namespace. It has no public checkout endpoint. Exact-origin checks, verified app identity and ownership of the fixed pilot profile gate creation/status access. The Flash account must control the target BTC wallet. See [FLASH.md](FLASH.md) for operation, retry and storage details.

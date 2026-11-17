@@ -64,7 +64,7 @@ BTC wallet and a USD wallet on the production endpoint. The default wallet was
 USD. A 21-sat, 10-minute invoice request explicitly addressed to that valid BTC
 wallet returned the same 'Flash does not support BTC wallets.' error. No invoice
 was returned and no payment was sent. The test endpoint did not recognise this
-receiving account. No private authenticated wallet operation was tested.
+receiving account. The owner subsequently reported that the authenticated wallet access check passed on 17 November. Authenticated invoice creation has not yet been verified live.
 
 Flash user docs still describe receiving and holding Bitcoin. Public API docs
 still describe the BTC recipient-invoice mutation. This conflicts with the probe
@@ -72,7 +72,7 @@ response, so runtime support must be confirmed before enabling checkout.
 
 ## Authenticated key path still to test
 
-The owner has now created a Flash API key and saved FLASH_API_KEY and FLASH_API_URL in Cloudflare. The secret has not been shared with maintainers. Live authentication and invoice creation have not yet been verified. Flash
+The owner has now created a Flash API key and saved FLASH_API_KEY and FLASH_API_URL in Cloudflare. The secret has not been shared with maintainers. The owner reported a successful live authentication and wallet-read check. Invoice creation has not yet been verified live. Flash
 documents keys in the format `fk_<keyId>_<secret>`, created through an authenticated
 user session with `apiKeyCreate`. Server requests use `X-API-KEY`; session tokens
 use Authorization. Obtain the minimum permissions for the chosen operations.
@@ -99,26 +99,47 @@ rewards or tips from Taste Folio through `lnInvoicePaymentSend` spends from a
 funded account controlled by that key. That is a separate payout and funding
 flow. No payout endpoint is currently implemented.
 
-## Required next information
+## Private invoice test
 
-The owner supplied a valid production receiving address, which also returned
-LNURL-pay metadata. The identity is omitted here. Confirm from
-Flash or the organisers of the supported BTC invoice endpoint, operation,
-recipient account requirements and required permissions. Ask:
+The settings page now includes an owner-only pilot for the existing profile slug
+`viola-korir-dcd4b1a1`. The API verifies that the authenticated Supabase user owns
+that exact D1 record. This is a temporary, explicit pilot restriction, not a role
+system or a generic Flash account connection mechanism.
 
-"We are integrating Bitcoin-only Lightning payments into Taste Folio. Both
-provided GraphQL endpoints return 'Flash does not support BTC wallets.' for
-lnInvoiceCreateOnBehalfOfRecipient, and both globals.network values are mainnet.
-Which BTC receive/invoice operation and recipient account should we use, and
-which environment is intended for the hackathon?"
+`POST /api/flash/invoice-test` accepts only `{ "action": "create" }` or
+`{ "action": "status" }`, with an exact same-origin Origin header. No client can
+choose an amount, recipient, wallet ID or invoice string.
 
-Do not paste account credentials, API secrets, PINs or recovery phrases into GitHub.
+Before creation it looks up the fixed recipient's BTC wallet and verifies that
+the authenticated Flash account controls that wallet. It checks mainnet, then
+calls authenticated `lnInvoiceCreate` for 21 sats with a ten-minute expiry. There
+is no USD fallback and no payment-send operation. It rejects unexpected returned
+amounts and invoice network prefixes. It does not expose an invoice QR or payment
+string: this private probe is not checkout and must not be advertised as one.
+
+The pilot record is stored under `internal/flash-invoice-test/<owner-id>.json` in
+the existing private R2 bucket. It contains the provider's payment request for
+server-side status queries. It is not an asset record and cannot be fetched via
+the media API. Conditional R2 writes reserve the test across Worker instances.
+For eleven minutes repeated creation requests reuse the saved invoice, or remain
+blocked if a creation result was uncertain. Network failures never cause an
+automatic mutation retry. A key/environment change requires review of the prior
+record before a new test.
+
+Status queries use the stored paymentRequest. Only Flash's PENDING, PAID and
+EXPIRED results are recognised. A failed status lookup remains unverified.
+The owner must click the private test button to run it using runtime credentials.
+Tests use synthetic invoices and mocked Flash replies; no real invoice or funded
+payment has been verified by these automated tests.
+
+If this authenticated operation also rejects BTC, send Flash support the operation
+name, endpoint and safe error message. Do not include the API key. Public offer
+checkout must wait until Bitcoin invoice creation and recipient routing work.
 
 ## Current product behaviour
 
 The portfolio can display a reusable Lightning address and let visitors copy it.
-Automatic Flash invoice creation, QR checkout and paid-status confirmation remain
-unimplemented. No simulated payment success or currency conversion was added.
+Public offer invoice creation and QR checkout remain unimplemented. A private, fixed-recipient invoice test is implemented as described below. No simulated payment success or currency conversion was added.
 
 Before adding those features, verify invoice amount, recipient, Bitcoin network
 and expiry; bind records server-side to the published portfolio; handle retries

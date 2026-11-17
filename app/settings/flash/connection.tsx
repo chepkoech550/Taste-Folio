@@ -14,9 +14,27 @@ const messages: Record<string, string> = {
   unavailable: 'Flash could not be reached successfully. Try again shortly.',
 };
 
-export default function FlashConnection() {
+const invoiceMessages: Record<string, string> = {
+  btc_unavailable: 'Flash rejected Bitcoin invoice creation: BTC wallets are not supported by this operation. No payable invoice was returned.',
+  recipient_mismatch: 'The saved key does not control the Bitcoin wallet for boodaboo. No invoice was requested.',
+  network_mismatch: 'Flash returned a different Bitcoin network. No invoice was requested.',
+  permissions: 'Flash denied the invoice operation. Check the key permissions for invoice creation.',
+  unauthorized: 'Flash rejected the credentials for the invoice test.',
+  provider_error: 'Flash did not return a successful invoice response. Invoice creation remains unverified.',
+  invalid_invoice: 'Flash returned an unexpected invoice amount or network. The invoice has not been exposed for payment.',
+  no_invoice: 'No private test invoice has been created yet.',
+  creation_pending: 'A test request is already in progress or its result is uncertain. To avoid duplicate invoices, wait 11 minutes before creating another.',
+  timeout: 'The Flash request timed out. Creation may have reached Flash. Use Check invoice status; a new request is blocked for 11 minutes.',
+  unavailable: 'The Flash request failed. Creation may have reached Flash. A new request is blocked for 11 minutes.',
+  storage_unavailable: 'The private test record could not be read or saved. Do not retry invoice creation until storage is working.',
+  environment_changed: 'The test record belongs to a different Flash environment. Ask the maintainer to review it before another test.',
+};
+
+export default function FlashConnection({ canTestInvoice = false }: { canTestInvoice?: boolean }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [invoiceBusy, setInvoiceBusy] = useState(false);
+  const [invoiceMessage, setInvoiceMessage] = useState('');
   async function check() {
     setBusy(true);
     setMessage('');
@@ -30,13 +48,38 @@ export default function FlashConnection() {
       setBusy(false);
     }
   }
+  async function testInvoice(action: 'create' | 'status') {
+    setInvoiceBusy(true);
+    setInvoiceMessage('');
+    try {
+      const result = await fetch('/api/flash/invoice-test', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action }),
+      });
+      const body = await result.json() as { status?: string; error?: string; paymentStatus?: string; statusCheck?: string };
+      if (!result.ok) setInvoiceMessage(body.error || 'The invoice test could not complete.');
+      else if (body.status === 'created') {
+        const state = body.paymentStatus === 'PENDING' ? 'Flash confirms it is awaiting payment.' : body.paymentStatus === 'PAID' ? 'Flash confirms it is paid.' : body.paymentStatus === 'EXPIRED' ? 'Flash confirms it has expired.' : 'The payment status check has not succeeded.';
+        setInvoiceMessage('Flash created a 21-sat Bitcoin invoice for boodaboo. ' + state + ' This private test does not enable offer checkout.');
+      } else setInvoiceMessage(invoiceMessages[body.status || 'provider_error'] || messages[body.status || 'provider_error'] || invoiceMessages.provider_error);
+    } catch {
+      setInvoiceMessage('The test response could not be read. Use Check invoice status before attempting creation again.');
+    } finally { setInvoiceBusy(false); }
+  }
   return <main className="flash-settings">
     <a href="/edit">← Back to your pitch</a>
     <p className="eyebrow">Payment connection</p>
     <h1>Connect Flash</h1>
     <p>Check the Flash credentials saved for Taste Folio. This uses the server settings already stored in Cloudflare.</p>
-    <p>No invoice is created and no money is sent. A successful connection check does not enable checkout.</p>
+    <p>The connection check creates no invoice and sends no money. A successful check does not enable checkout.</p>
     <button className="primary" disabled={busy} onClick={check}>{busy ? 'Checking Flash…' : 'Check connection'}</button>
     <p role="status" aria-live="polite">{message}</p>
+    {canTestInvoice && <section aria-labelledby="invoice-test-heading">
+      <h2 id="invoice-test-heading">Private Bitcoin invoice test</h2>
+      <p>Request a 21-sat invoice for boodaboo, expiring in 10 minutes. The server first verifies that the saved key controls this recipient’s Bitcoin wallet.</p>
+      <p>This uses real Bitcoin mainnet. The test sends no money and keeps the payable invoice private.</p>
+      <button className="primary" disabled={busy || invoiceBusy} onClick={() => testInvoice('create')}>{invoiceBusy ? 'Checking invoice…' : 'Create 21-sat test invoice'}</button>{' '}
+      <button disabled={busy || invoiceBusy} onClick={() => testInvoice('status')}>Check invoice status</button>
+      <p role="status" aria-live="polite">{invoiceMessage}</p>
+    </section>}
   </main>;
 }
