@@ -1,5 +1,12 @@
 # Changelog
 
+## Flash connection diagnostic
+
+- Added a signed-in Flash connection check using the credentials stored in Cloudflare.
+- Restricted credential destinations to official Flash endpoints and kept provider/account details server-side.
+- Added tests for auth, origin protection, failed credentials, scope failures and safe status handling.
+- Invoice creation and funded payments remain unverified and disabled.
+
 ## Unreleased
 
 ### Express value: pitch, offers and opportunity
@@ -39,3 +46,4 @@
 - Issue forms, pull request template and automated build/typecheck/integration workflow.
 
 No tagged release has been published yet. Add a dated release entry when a tested submission version is tagged.
+

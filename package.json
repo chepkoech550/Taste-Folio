@@ -13,7 +13,7 @@
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
     "typecheck": "tsc --noEmit",
-    "test": "node --test tests/auth.test.mjs && node tests/integration.mjs",
+    "test": "node --test tests/auth.test.mjs tests/flash.test.mjs && node tests/integration.mjs",
     "check": "npm run typecheck && npm run build && npm test"
   },
   "dependencies": {
@@ -73,3 +73,4 @@
   },
   "description": "Portfolio publishing with skills supported by project evidence"
 }
+

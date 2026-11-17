@@ -17,6 +17,16 @@ try{
  const identity={Cookie:'__Host-tf-access=qa-owner'};
  const otherIdentity={Cookie:'__Host-tf-access=qa-other'};
  async function call(path,method='GET',body,headers={}){const r=await mf.dispatchFetch(root+path,{method,headers:{...headers,...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});let value;try{value=await r.json()}catch{}return {r,value}}
+ // The payment diagnostic is authenticated, requires an exact Origin and is never cached.
+ assert.equal((await call('/api/flash/connection','POST',undefined,{Origin:root})).r.status,401);
+ assert.equal((await call('/api/flash/connection','POST',undefined,{Origin:root,'oai-authenticated-user-id':'forged','oai-authenticated-user-email':'fake@example.test'})).r.status,401);
+ assert.equal((await call('/api/flash/connection','POST',undefined,identity)).r.status,403);
+ assert.equal((await call('/api/flash/connection','POST',undefined,{...identity,Origin:'https://attacker.example'})).r.status,403);
+ const flashCheck=await call('/api/flash/connection','POST',undefined,{...identity,Origin:root});
+ assert.equal(flashCheck.r.status,200);assert.equal(flashCheck.value.status,'not_configured');
+ assert.equal(flashCheck.r.headers.get('cache-control'),'private, no-store');
+ const flashSettings=await mf.dispatchFetch(root+'/settings/flash',{headers:identity});
+ assert.equal(flashSettings.status,200);assert((await flashSettings.text()).includes('Check connection'));
  let p={offers:[{id:'offer-1',title:'Office plant consultation',description:'Review light, choose plants and plan their placement.',price:'KSh 3,500'}],name:'QA Portfolio',headline:'Indoor plant stylist',location:'Nairobi',bio:'Test portfolio for the publishing journey.',skills:['Plant selection'],availability:['Freelance projects'],projects:[{id:'project-1',title:'Office styling',kind:'Personal project',context:'A test brief.',role:'Stylist',contribution:'Selected plants and planned placement.',outcome:'Documented a placement plan.',skills:['Plant selection'],image:'',link:'https://example.com/work'}],email:'qa@example.test'};
  assert.equal((await call('/api/portfolio','POST',{profile:p,action:'publish'})).r.status,401);
  assert.equal((await call('/api/portfolio','POST',{profile:p,action:'publish'},{'oai-authenticated-user-id':'forged','oai-authenticated-user-email':'fake@example.test'})).r.status,401);
@@ -52,3 +62,4 @@ try{
  assert.equal((await call('/api/portfolio','POST',{profile:{...legacy,offers:[]},action:'publish'},{Cookie:'__Host-tf-access=qa-legacy'})).r.status,400);
  console.log('Passed: auth, origin checks, publish validation, drafts, published snapshots, owner isolation, SSR portfolios, image upload/access, unpublishing, tipping validation, offer validation and enquiry links, legacy service compatibility, server-rendered discovery, performer actions, public card snapshot boundaries and unsafe-link rejection.');
 }finally{await mf.dispose()}
+
