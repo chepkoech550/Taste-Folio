@@ -1,0 +1,1 @@
+export default function SiteNav({signedIn=false}:{signedIn?:boolean}){return <header><a className="brand" href="/">Taste Folio<span>.</span></a><nav><a href="/">Find talent</a><a href="/opportunities">Find paid work</a>{signedIn&&<a href="/work">My work</a>}<a className="button primary" href="/edit">{signedIn?'My pitch':'Get paid for your skills'}</a></nav></header>}

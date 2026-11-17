@@ -11,7 +11,7 @@ The original private Sites preview has a separate source and authentication gate
 | React, app routes and Vinext | Portfolio UI, server rendering and API handlers |
 | Cloudflare Worker | Request handling and trusted identity boundary |
 | Supabase Auth | Account credentials, verified identity and session renewal |
-| Cloudflare D1 | Portfolio drafts, published snapshots and image ownership |
+| Cloudflare D1 | Portfolio drafts, published snapshots, image ownership, opportunities, signed Nostr identities and challenges |
 | Cloudflare R2 | Uploaded image bytes and private immutable payment records |
 | Flash | USD-settled recipient invoices and payment-status queries |
 
@@ -121,3 +121,24 @@ See [SHARING.md](SHARING.md).
 ## Private Flash invoice pilot
 
 The owner-only invoice diagnostic uses the existing private R2 binding for one fixed-recipient test record, outside the assets namespace. It has no public checkout endpoint. Exact-origin checks, verified app identity and ownership of the fixed pilot profile gate creation/status access. The Flash account must control the target wallet in the explicitly selected currency. The current private UI uses USD Cash Wallet settlement; BTC mode remains only for regression checks. See [FLASH.md](FLASH.md) for operation, retry and storage details.
+
+## Paid work and Nostr extension
+
+The /opportunities board is public; /opportunities/new and /work require verified
+authentication. /opportunities/[id] renders a role-filtered work view. GET/POST
+/api/opportunities and /api/opportunities/[id] use the existing identity boundary;
+mutations require exact Origin. lib/opportunities.mjs owns state transitions and
+D1 version checks. Private proposals, delivery and payment records never enter a
+public projection. Existing checkout handles immutable recipient invoices in R2.
+[Agreement and payment design](WORK.md).
+
+/api/nostr is account-private. A one-time signed challenge binds a key to the
+verified account. lib/public-pitches.ts attaches only verified public identity to
+published listings. Kind 30402 talent listings are derived from published content,
+validated server-side and sent to relays by the browser after explicit preview.
+[Identity and relay boundaries](NOSTR.md).
+
+lib/work-schema.mjs adds new tables/indexes idempotently on first use. Existing
+portfolio and image data is preserved. drizzle/0001_wise_daredevil.sql records the
+same schema for normal migration tooling. Dashboard secrets and bindings remain
+unchanged.

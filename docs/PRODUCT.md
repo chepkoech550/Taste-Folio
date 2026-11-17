@@ -1,43 +1,48 @@
-# Express value
+# Get paid for your skills
 
-Taste Folio helps someone express what their skills make possible and offer it
-to another person. Work, experience and credentials give the offer credibility.
+Taste connects people who can deliver with people who need work done. The public
+headline is **Get paid for your skills.** Maroon and gold remain the visual identity.
 
-## Core journey
+## Two paths to work
 
-1. A person writes a pitch: who they help and what they can do.
-2. They add up to three offers, each with a title, scope/benefit and optional price.
-3. They show work and provide a contact path.
-4. A visitor searches for a need, understands the offer and starts a conversation.
-5. Optional tips use published receiving details while Flash is pending.
+A professional publishes a pitch, up to three offers, project evidence and a
+contact path. A visitor can enquire, pay a USD-priced Flash offer, or tip using
+the published receiving details. Printed QR cards keep the same published URL.
 
-Example: a street saxophonist pitches live music for events and restaurants,
-shows a performance clip through project evidence, and can receive support from
-people who discover the work through a QR code.
+A buyer can post a paid opportunity with an outcome, budget, deadline and clear
+acceptance criteria. Professionals apply with a published pitch. The buyer selects
+one person; that person accepts the proposed scope and milestone amounts before
+work begins. Delivery and review stay private. Approval makes payment due; only
+Flash's PAID status confirms payment. A small bounty is simply one milestone.
+
+[Work flow and boundaries](WORK.md).
 
 ## Keep the interface focused
 
-The four editor steps are Your pitch, Your offers, Proof & contact, Review &
-publish. An offer has three fields. Background and payment details remain optional.
-There is one reusable QR code and one business-card print layout.
+There is one account for hiring and earning, one opportunity board and one My work
+page. The pitch editor keeps four steps: Your pitch, Your offers, Proof & contact,
+Review & publish. Offers have title, description and optional Price (USD).
+The duplicate free-text price entry and separate experience/education forms were
+removed. Existing background records can be reviewed or removed; projects and
+HTTPS evidence links remain the path for new proof.
 
-Enquire opens an offer-specific email or WhatsApp message. It does not confirm a
-booking, accept a contract, send a payment or create an invoice. No cart, scheduling
-system, platform payout or automatic payment confirmation has been implemented.
+Nostr is optional under Proof & contact. A connected key can sign a public talent
+listing for relays. Ordinary sign-in and the local talent pool work without it.
+[Nostr identity and listing scope](NOSTR.md).
 
-## Existing data and links
+## Compatibility
 
-The bio and headline fields now serve the pitch. An optional offers array stores
-structured offers in the existing draft/published JSON.
+The existing draft/published separation and stable /p/ links remain. Application
+updates do not rewrite claims, prices or project evidence. Legacy offers are still
+read when the offers array is absent; an explicit empty array stays empty. Existing
+experience/credential data is preserved until its owner removes it and republishes.
 
-When offers is absent, the former service/rate fields appear as a legacy offer,
-using an excerpt of the existing bio as its description. This uses supplied content rather than
-inventing a new claim. Opening an old draft prepares that offer for editing.
-An explicit empty offers array never falls back to the legacy service.
+New opportunity and Nostr tables are created idempotently; the original portfolio
+and asset tables are preserved. No new runtime secrets are needed.
 
-Publishing requires at least one clear offer, plus the existing pitch, evidence
-and contact checks. Existing published records remain readable. Stable /p/ links
-and printed QR destinations are unchanged. No migration or runtime setting is needed.
+## Deliberately deferred
 
-The owner should review their pitch wording and offer scope before republishing.
-Application updates do not rewrite their saved project claims or prices.
+Chat, scheduling, rankings, automated matching, separate employer/seller accounts,
+speculative contests, imported Nostr feeds, escrow, refunds, platform payouts and
+independent credential verification. Taste facilitates agreement and payment;
+it does not guarantee delivery, payment or employment.

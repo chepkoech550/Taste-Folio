@@ -15,3 +15,7 @@ Before describing the repository as open source, select an appropriate project l
 ## bolt11
 
 BitcoinJS bolt11 1.4.2 validates Lightning invoices. MIT license: [vendor/bolt11-LICENSE.txt](vendor/bolt11-LICENSE.txt). Dependencies retain their respective licenses.
+
+## nostr-tools
+
+nostr-tools 2.23.8 provides Nostr event verification and public key encoding. Unlicense: [vendor/nostr-tools-LICENSE.txt](vendor/nostr-tools-LICENSE.txt).

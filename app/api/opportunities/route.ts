@@ -1,0 +1,5 @@
+import {db,owner,response} from '../../../lib/server';
+import {createOpportunity,listOpportunities} from '../../../lib/opportunities.mjs';
+export const dynamic='force-dynamic';
+export async function GET(request:Request){const user=await owner(),url=new URL(request.url),mine=url.searchParams.get('mine')==='1';if(mine&&!user)return response({error:'Sign in to see your work.'},401);return response(await listOpportunities(db(),user,{mine,page:Number(url.searchParams.get('page')||0)}))}
+export async function POST(request:Request){if(request.headers.get('origin')!==new URL(request.url).origin)return response({error:'Invalid origin.'},403);const user=await owner();if(!user)return response({error:'Sign in to post an opportunity.'},401);try{const raw=await request.text();if(raw.length>16000)return response({error:'The brief is too large.'},413);return response(await createOpportunity(db(),user,JSON.parse(raw)),201)}catch(error:any){return response({error:error.code?error.message:'The opportunity could not be saved.'},error.code||400)}}

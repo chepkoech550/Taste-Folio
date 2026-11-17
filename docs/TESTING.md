@@ -8,7 +8,7 @@ npm run check
 
 Runs TypeScript checks, a production build, then:
 
-1. `node --test tests/auth.test.mjs`: 15 auth tests.
+1. `node --test tests/auth.test.mjs tests/flash.test.mjs tests/checkout.test.mjs tests/work.test.mjs`: 34 unit tests.
 2. `node tests/integration.mjs`: built Worker checks in isolated Miniflare storage.
 
 Authentication tests cover safe redirects, cookie flags, form origin/CSRF checks,
@@ -31,9 +31,9 @@ isolation, server-rendered portfolios, upload access, unpublishing and unsafe li
 | Supabase runtime settings | Owner reported adding them in Cloudflare |
 | Signup and profile creation after the origin fix | Owner reported profile created |
 | Production session expiry, two-account isolation and all email flows | Not independently verified |
-| External unauthenticated /api/profiles request | A separate HTTP probe returned 403; cause undiagnosed, browser recheck required |\n| Real Flash payment | Not performed |
+| External unauthenticated /api/profiles request | A separate HTTP probe returned 403; cause undiagnosed, browser recheck required |\n| Real Flash payment | Owner later reports a confirmed USD 1.00 offer payment; wallet credit not independently verified |
 | Public Flash recipient BTC invoice operation | Returned documented provider error |
-| Authenticated Flash invoice with API key | Not tested; no key supplied |
+| Authenticated Flash invoice with API key | Owner later reports successful USD invoice creation and expiry |
 
 The latest application-code validation was before later documentation-only commits.
 No fresh application checks are implied by a documentation update. GitHub/Vercel
@@ -94,3 +94,20 @@ Manual acceptance: write one pitch, add an offer, select its enquiry action,
 search by a need mentioned in an offer, review the saxophonist example, then
 confirm the existing published link and QR card still work. Messages, bookings
 and payments are not submitted by these UI checks.
+
+
+## Paid work and Nostr checks, 17 November 2026
+
+npm run check passes TypeScript, production build, 34 unit tests and isolated
+Worker integration checks. The work tests cover two accounts, proposal privacy,
+selection and acceptance, Flash USD recipient lookup, revisions, approval without
+payment, immutable amount/recipient, provider-confirmed milestone payment and
+completion. The Nostr tests reject invalid signatures, wrong accounts, replay and
+modified listing content, and verify that private fields are excluded.
+
+The browser review uses local fictional QA data only. It does not publish a real
+job, accept a real work agreement, send money or post to Nostr relays. The owner
+separately reports a confirmed USD 1.00 offer payment. Check Cash Wallet credit
+and perform a consenting live two-account milestone demo before claiming funded
+milestone settlement. A real NIP-07 signer and relay acknowledgement also need a
+live demonstration. Automated tests use simulated auth and provider responses.

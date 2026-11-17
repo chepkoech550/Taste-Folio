@@ -3,7 +3,7 @@
 ## Enable an offer
 
 1. Sign in and open Your offers in the editor.
-2. Enter an exact Lightning price (USD), such as 25.00. This is the amount the
+2. Enter an exact Price (USD), such as 25.00. This is the amount the
    recipient will receive as a USD balance in Flash; it is not a conversion of
    the older free-text rate. The accepted range is USD 0.01 to 10,000.00.
 3. In Proof & contact, open Payment receiving details and enter the professional's
@@ -59,3 +59,13 @@ remain untested. The existing published service price was not changed; the owner
 chose to enter the desired USD amount themselves.
 
 A separate live unpaid USD 1.00 Flash recipient invoice passed the production decoder, including network, amount and expiry checks. No payment was sent during that verification.
+
+## Agreed milestone payments
+
+[Paid work](WORK.md) reuses the same validated invoice/receipt backend. Both parties
+must agree first. The server reads the frozen agreement amount and professional's
+Flash destination. Approval leaves payment unpaid; only Flash PAID changes that
+state. New milestone payments have passed simulated-provider integration checks;
+a funded live milestone demonstration is pending. The owner separately reported
+one USD 1.00 offer payment confirmed by Flash; Cash Wallet credit is not independently
+verified.

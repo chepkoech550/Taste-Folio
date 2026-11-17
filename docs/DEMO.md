@@ -2,39 +2,39 @@
 
 ## The story
 
-A person expresses their value, turns it into an offer and gives others a way to
-work with or support them. Work evidence builds confidence in the offer.
+Taste helps people get paid for their skills. A professional shows what they can
+deliver; a buyer offers paid work; both agree a clear outcome and milestones.
+Lightning provides a direct payment path, with USD received in Flash.
 
 ## Demo sequence
 
-1. Open https://taste-folio.violakorir24.workers.dev/
-2. Search for a need, such as office plants or live music.
-3. Show a person's pitch and the What I can do for you section.
-4. Open Enquire for one offer. Explain that the message names that offer.
-5. Show the work and skills supporting it.
-6. Demonstrate a published pitch's reusable QR and business card.
-7. For the saxophonist example, explain street discovery, event enquiries and tips.
+1. Open the homepage: Get paid for your skills. Show the talent pool and a real
+   published pitch with an offer and evidence.
+2. Find paid work. A consenting buyer posts a clear brief, acceptance criteria,
+   deadline and one or two milestone amounts.
+3. A separate professional account applies with a published pitch. The buyer
+   selects them; the professional accepts the exact scope and payment terms.
+4. Show private delivery, request changes if appropriate, and approve the work.
+   Explain that approved still means payment is due.
+5. Choose Pay with Lightning. Check amount, recipient and invoice expiry. A real
+   payer confirms in their own wallet. Only Flash PAID marks the milestone paid.
+6. Optionally preview the published talent listing and use a Nostr browser signer
+   to connect and publish. Show actual relay acknowledgement if one is returned.
+7. Close with the printable QR card as a simple path back to the professional.
 
-Examples are illustrative and cannot be presented as real bookings or payments.
-Their tipping action explains that receiving details are needed for a real pitch.
+A one-milestone task covers a small bounty. No extra bounty board or account type
+is needed. There is no escrow, payout automation or guarantee of delivery/payment.
 
-## Lightning checkout
+## Evidence and preparation
 
-Publish an offer with an explicit Lightning price (USD) and a Flash address.
-Open the public pitch, choose Pay with Lightning and show the invoice QR,
-recipient, price and expiry. Payment confirmation must come from Flash.
-Clients pay BTC over Lightning; recipients receive a USD balance in Flash.
-The owner explicitly approved this settlement choice after BTC invoice rejection.
+The owner reported one confirmed USD 1.00 offer payment. Cash Wallet credit has
+not been independently verified. New milestone and Nostr flows pass isolated tests
+with simulated providers. A funded milestone and live signer/relay demo remain
+pending. Label any recorded fixtures as examples and never present them as real
+jobs, users or payments. Agree the payer, recipient, amount and fee bound before
+a funded demonstration.
 
-A live unpaid USD invoice and pending status were verified separately. Automated
-paid-state tests use fixtures. Do not claim a real paid settlement until a payer,
-recipient and bounded amount have been agreed and that transfer has been verified.
-[Setup](CHECKOUT.md).
-
-## Submission checks
-
-Confirm the organisers' current deadline and access requirements directly. The
-repository remains private until the owner changes its visibility. Select a
-licence, retain notices, obtain consent for project content, tag the tested commit,
-and prepare a backup recording. Disclose AI assistance and actual payment limits.
-
+Confirm organisers' current deadline and access requirements. The repository
+remains private until its owner changes visibility. Select a project licence,
+retain notices, obtain permission for demo content and record a playable backup.
+[Work guide](WORK.md) · [Nostr guide](NOSTR.md) · [Checkout](CHECKOUT.md).

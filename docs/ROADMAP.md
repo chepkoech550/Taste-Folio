@@ -51,7 +51,7 @@ them, and accounts remain isolated.
 - [x] Handle unpaid, expired, failed and duplicate requests. (Implemented; local tests.)
 - [ ] Run an explicitly agreed funded demonstration on the verified network.
 
-USD checkout is implemented; a funded production test remains outstanding. Platform-funded rewards and payouts are a separate future flow.
+USD checkout is implemented; the owner reports an offer payment confirmed. Independent wallet-credit and funded milestone verification remain outstanding. Platform-funded rewards and payouts are a separate future flow.
 
 ## P0: three-user pilot
 
@@ -75,3 +75,15 @@ USD checkout is implemented; a funded production test remains outstanding. Platf
 Messaging, reviews, rankings, scheduling, hiring algorithms, automated M-Pesa
 processing, escrow, wallet custody and independent credential verification.
 
+
+## Paid opportunities and optional Nostr
+
+- [x] Add Get paid for your skills to the homepage.
+- [x] One board, one account for hiring/earning and one My work page.
+- [x] Buyer selection, professional acceptance and one to three agreed milestones.
+- [x] Private delivery, revision, approval and provider-confirmed Lightning payment.
+- [x] Optional verified Nostr key and previewed public talent listing.
+- [x] Remove duplicate free-text pricing and separate experience/education forms.
+- [x] Preserve existing published links, evidence, offer checkout and QR cards.
+- [ ] Live two-account work flow and funded milestone settlement.
+- [ ] Live browser signer and relay acceptance demonstration.

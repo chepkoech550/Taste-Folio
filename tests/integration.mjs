@@ -4,10 +4,11 @@ import { dirname,resolve } from 'node:path';
 import { readFileSync,readdirSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import bolt11 from 'bolt11';
+import {finalizeEvent,getPublicKey} from 'nostr-tools/pure';
 const checkoutInvoice=bolt11.sign(bolt11.encode({satoshis:1000,timestamp:Math.floor(Date.now()/1000),tags:[{tagName:'payment_hash',data:'b'.repeat(64)},{tagName:'description',data:'Checkout fixture'},{tagName:'expire_time',data:300}]}),'1'.repeat(64)).paymentRequest;
 const fetchMock=createFetchMock();fetchMock.disableNetConnect();
 const authPool=fetchMock.get('https://test-project.supabase.co');
-for(const [token,id,email] of [['qa-owner','qa-portfolio-owner','qa@example.test'],['qa-other','qa-other','other@example.test'],['qa-legacy','qa-legacy','legacy@example.test']]) authPool.intercept({path:'/auth/v1/user',method:'GET',headers:{authorization:'Bearer '+token}}).reply(200,{id,email}).persist();
+for(const [token,id,email] of [['qa-owner','qa-portfolio-owner','qa@example.test'],['qa-other','qa-other','other@example.test'],['qa-legacy','qa-legacy','legacy@example.test'],['qa-stranger','qa-stranger','stranger@example.test']]) authPool.intercept({path:'/auth/v1/user',method:'GET',headers:{authorization:'Bearer '+token}}).reply(200,{id,email}).persist();
 authPool.intercept({path:'/auth/v1/token?grant_type=password',method:'POST'}).reply(200,{access_token:'qa-owner',refresh_token:'qa-refresh',expires_in:3600}).persist();
 const flashPool=fetchMock.get('https://api.flashapp.me');
 flashPool.intercept({path:'/graphql',method:'POST',headers:{'x-api-key':'fk_integration_fixture'}}).reply(200,{data:{me:{defaultAccount:{wallets:[{walletCurrency:'BTC',id:'private-fixture-wallet'}]}}}});
@@ -27,7 +28,17 @@ for (const [operation,data] of [
 }
 flashPool.intercept({path:'/graphql',method:'POST',headers:{'x-api-key':'fk_integration_fixture'}}).reply(200,{data:{recipient:{id:'checkout-usd',walletCurrency:'USD'},globals:{network:'mainnet'}}});
 flashPool.intercept({path:'/graphql',method:'POST',headers:{'x-api-key':'fk_integration_fixture'}}).reply(200,{data:{lnUsdInvoiceCreateOnBehalfOfRecipient:{errors:[],invoice:{paymentRequest:checkoutInvoice,satoshis:null}}}});
-flashPool.intercept({path:'/graphql',method:'POST',headers:{'x-api-key':'fk_integration_fixture'}}).reply(200,{data:{lnInvoicePaymentStatus:{errors:[],status:'PAID'}}}).persist();
+flashPool.intercept({path:'/graphql',method:'POST',headers:{'x-api-key':'fk_integration_fixture'}}).reply(200,{data:{lnInvoicePaymentStatus:{errors:[],status:'PAID'}}});
+// Verify the professional's Flash account before accepting paid work.
+flashPool.intercept({path:'/graphql',method:'POST',headers:{'x-api-key':'fk_integration_fixture'}}).reply(200,{data:{recipient:{id:'work-cash-wallet',walletCurrency:'USD'},globals:{network:'mainnet'}}});
+// Milestone invoices follow the existing offer checkout checks.
+for(let milestone=0;milestone<2;milestone++){
+ flashPool.intercept({path:'/graphql',method:'POST',headers:{'x-api-key':'fk_integration_fixture'}}).reply(200,{data:{recipient:{id:'work-cash-wallet',walletCurrency:'USD'},globals:{network:'mainnet'}}});
+ const invoice=bolt11.sign(bolt11.encode({satoshis:1000,timestamp:Math.floor(Date.now()/1000),tags:[{tagName:'payment_hash',data:(milestone?'d':'c').repeat(64)},{tagName:'description',data:'Milestone fixture'},{tagName:'expire_time',data:300}]}),'1'.repeat(64)).paymentRequest;
+ flashPool.intercept({path:'/graphql',method:'POST',headers:{'x-api-key':'fk_integration_fixture'}}).reply(200,{data:{lnUsdInvoiceCreateOnBehalfOfRecipient:{errors:[],invoice:{paymentRequest:invoice,satoshis:null}}}});
+ if(milestone===0)flashPool.intercept({path:'/graphql',method:'POST',headers:{'x-api-key':'fk_integration_fixture'}}).reply(200,{data:{lnInvoicePaymentStatus:{errors:[],status:'PENDING'}}});
+ flashPool.intercept({path:'/graphql',method:'POST',headers:{'x-api-key':'fk_integration_fixture'}}).reply(200,{data:{lnInvoicePaymentStatus:{errors:[],status:'PAID'}}});
+}
 const options=unstable_getMiniflareWorkerOptions('dist/server/wrangler.json');
 const rootDir=dirname(options.main);const files=readdirSync(rootDir,{recursive:true}).filter(f=>/\.m?js$/.test(f)&&f!=='index.js');const modules=['index.js',...files].map(f=>({type:'ESModule',path:resolve(rootDir,f)}));const mf=new Miniflare({...options.workerOptions,modules,modulesRoot:rootDir,cf:false,fetchMock,bindings:{...options.workerOptions.bindings,SUPABASE_URL:'https://test-project.supabase.co',SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test',FLASH_API_URL:'https://api.flashapp.me/graphql',FLASH_API_KEY:'fk_integration_fixture'}});
 try{
@@ -73,7 +84,7 @@ try{
  const performerCard=await mf.dispatchFetch(root+'/p/'+slug+'/card');const cardHtml=await performerCard.text();assert.equal(performerCard.status,200);assert(cardHtml.includes('Offers · Tips · Enquiries'));assert(cardHtml.includes('https://taste-folio.violakorir24.workers.dev/p/'+slug));assert(!cardHtml.includes('artist@example.test'));
  assert.equal((await call('/api/portfolio','POST',{profile:{...p,projects:[{...p.projects[0],link:'javascript:alert(1)'}]},action:'draft'},identity)).r.status,400);
  assert(performerHtml.indexOf('What I can do for you')<performerHtml.indexOf('Work behind the offer'));
- const home=await mf.dispatchFetch(root+'/');const homeHtml=await home.text();assert(homeHtml.includes('Find someone'));assert(homeHtml.includes('Office plant consultation'));
+ const home=await mf.dispatchFetch(root+'/');const homeHtml=await home.text();assert(homeHtml.includes('Get paid'));assert(homeHtml.includes('Office plant consultation'));
  assert.equal((await call('/api/portfolio','POST',{profile:{...p,offers:[]},action:'publish'},identity)).r.status,400);
  assert.equal((await call('/api/portfolio','POST',{profile:{...p,offers:Array.from({length:4},(_,i)=>({...p.offers[0],id:'offer-'+i}))},action:'draft'},identity)).r.status,400);
  assert.equal((await call('/api/portfolio','POST',{profile:{...p,offers:[{...p.offers[0],description:''}]},action:'publish'},identity)).r.status,400);
@@ -134,6 +145,58 @@ try{
  assert.equal((await call('/api/checkout','POST',checkoutInput,{Origin:root})).value.checkout.usdCents,2550);
  await call('/api/portfolio','POST',{profile:checkoutProfile,action:'unpublish'},identity);
  assert.equal((await call('/api/checkout','POST',{...checkoutInput,id:'12345678-1234-4123-8123-123456789abd'},{Origin:root})).r.status,404);
- console.log('Passed: auth, origin checks, publish validation, drafts, published snapshots, owner isolation, SSR portfolios, image upload/access, unpublishing, tipping validation, offer validation and enquiry links, legacy service compatibility, server-rendered discovery, performer actions, public card snapshot boundaries and unsafe-link rejection.');
+ // Paid opportunities: role boundaries, agreement, private delivery and real provider state.
+ await call('/api/portfolio','POST',{profile:checkoutProfile,action:'publish'},identity);
+ const buyer={...otherIdentity,Origin:root},seller={...identity,Origin:root},stranger={Cookie:'__Host-tf-access=qa-stranger',Origin:root};
+ const brief={buyerName:'Office buyer',title:'Office plant plan',outcome:'Create a plant plan',criteria:'Five plants and care notes',location:'Nairobi',skills:['Plant styling'],deadline:new Date(Date.now()+86400000).toISOString().slice(0,10),budgetUsd:'60',milestones:[{title:'Booking',criteria:'Reserve the consultation',usdPrice:'20',kind:'upfront'},{title:'Plant plan',criteria:'Five plants and care notes',usdPrice:'40',kind:'delivery'}]};
+ assert.equal((await call('/api/opportunities','POST',brief,{Origin:root})).r.status,401);
+ assert.equal((await call('/api/opportunities','POST',brief,otherIdentity)).r.status,403);
+ assert.equal((await call('/api/opportunities','POST',{...brief,budgetUsd:'61'},buyer)).r.status,400);
+ const posted=await call('/api/opportunities','POST',brief,buyer);assert.equal(posted.r.status,201,JSON.stringify(posted.value));const job=posted.value.opportunity.id,path='/api/opportunities/'+job;
+ assert((await call('/api/opportunities')).value.opportunities.some(o=>o.id===job));
+ assert.equal((await call(path,'POST',{action:'apply',proposal:'Cannot apply to own work'},buyer)).r.status,400);
+ assert.equal((await call(path,'POST',{action:'apply',proposal:'PRIVATE APPLICATION: my approach'},seller)).r.status,200);
+ const strangerView=await call(path,'GET',undefined,stranger);assert(!JSON.stringify(strangerView.value).includes('PRIVATE APPLICATION'));
+ const applications=(await call(path,'GET',undefined,buyer)).value.opportunity.applications;
+ assert.equal((await call(path,'POST',{action:'select',applicationId:applications[0].id},stranger)).r.status,403);
+ const selected=await call(path,'POST',{action:'select',applicationId:applications[0].id},buyer);assert.equal(selected.value.opportunity.status,'selection');const first=selected.value.opportunity.milestones[0].id,second=selected.value.opportunity.milestones[1].id;
+ assert.equal((await call(path,'POST',{action:'pay',milestoneId:first},buyer)).r.status,400);
+ assert.equal((await call(path,'POST',{action:'accept'},stranger)).r.status,403);
+ const accepted=await call(path,'POST',{action:'accept'},seller);assert.equal(accepted.value.opportunity.agreement,'accepted');assert.equal(accepted.value.opportunity.milestones[0].payment,'unpaid');
+ assert.equal((await call(path,'POST',{action:'pay',milestoneId:second},buyer)).r.status,400);
+ assert.equal((await call(path,'POST',{action:'pay',milestoneId:first},seller)).r.status,403);
+ const booking=await call(path,'POST',{action:'pay',milestoneId:first,amount:1,recipient:'attacker'},buyer);assert.equal(booking.r.status,200,JSON.stringify(booking.value));assert.equal(booking.value.checkout.usdCents,2000);assert.equal(booking.value.checkout.recipient,'boodaboo@flashapp.me');
+ const pending=await call(path,'POST',{action:'check_payment',milestoneId:first},seller);assert.equal(pending.value.opportunity.milestones[0].payment,'unpaid');
+ const receiptKey='internal/offer-payments/'+booking.value.checkout.id+'.json';const receipt=await bucket.get(receiptKey);const receiptValue=await receipt.json();await bucket.put(receiptKey,JSON.stringify({...receiptValue,lastCheckedAt:0}));
+ const bookingPaid=await call(path,'POST',{action:'check_payment',milestoneId:first},buyer);assert.equal(bookingPaid.value.opportunity.milestones[0].payment,'paid',JSON.stringify(bookingPaid.value));
+ assert.equal((await call(path,'POST',{action:'deliver',milestoneId:second,note:'Wrong actor'},buyer)).r.status,403);
+ const delivery=await call(path,'POST',{action:'deliver',milestoneId:second,note:'PRIVATE DELIVERY: care plan',url:'https://example.test/delivery'},seller);assert.equal(delivery.r.status,200);
+ assert(!JSON.stringify((await call(path)).value).includes('PRIVATE DELIVERY'));
+ assert(!JSON.stringify((await call(path,'GET',undefined,stranger)).value).includes('PRIVATE DELIVERY'));
+ assert.equal((await call(path,'POST',{action:'approve',milestoneId:second},seller)).r.status,403);
+ await call(path,'POST',{action:'request_changes',milestoneId:second,note:'Add care intervals'},buyer);
+ await call(path,'POST',{action:'deliver',milestoneId:second,note:'PRIVATE DELIVERY updated',url:'https://example.test/final'},seller);
+ const approved=await call(path,'POST',{action:'approve',milestoneId:second},buyer);assert.equal(approved.value.opportunity.milestones[1].state,'approved');assert.equal(approved.value.opportunity.milestones[1].payment,'unpaid');
+ assert.equal((await call(path,'POST',{action:'mark_paid',milestoneId:second},buyer)).r.status,400);
+ const finalInvoice=await call(path,'POST',{action:'pay',milestoneId:second},buyer);assert.equal(finalInvoice.value.checkout.usdCents,4000,JSON.stringify(finalInvoice.value));
+ const complete=await call(path,'POST',{action:'check_payment',milestoneId:second},seller);assert.equal(complete.value.opportunity.status,'completed',JSON.stringify(complete.value));
+ assert.equal((await call(path,'POST',{action:'new_invoice',milestoneId:second},buyer)).r.status,400);
+ assert((await call('/api/opportunities?mine=1','GET',undefined,identity)).value.opportunities.some(o=>o.id===job));
+ // Optional Nostr ownership proof and signed listing, with no real relay publication.
+ const nostrKey=new Uint8Array(32).fill(7),pubkey=getPublicKey(nostrKey);
+ assert.equal((await call('/api/nostr','POST',{action:'challenge',pubkey},{Origin:root})).r.status,401);
+ const challenge=await call('/api/nostr','POST',{action:'challenge',pubkey},seller);assert.equal(challenge.r.status,200,JSON.stringify(challenge.value));
+ const signedChallenge=finalizeEvent(challenge.value.event,nostrKey);
+ assert.equal((await call('/api/nostr','POST',{action:'connect',challengeId:challenge.value.challengeId,event:{...signedChallenge,sig:'0'.repeat(128)}},seller)).r.status,400);
+ assert.equal((await call('/api/nostr','POST',{action:'connect',challengeId:challenge.value.challengeId,event:signedChallenge},buyer)).r.status,400);
+ const connected=await call('/api/nostr','POST',{action:'connect',challengeId:challenge.value.challengeId,event:signedChallenge},seller);assert.equal(connected.value.identity.pubkey,pubkey,JSON.stringify(connected.value));
+ assert.equal((await call('/api/nostr','POST',{action:'connect',challengeId:challenge.value.challengeId,event:signedChallenge},seller)).r.status,400);
+ const publicPitch=(await call('/api/profiles')).value.profiles.find(o=>o.slug===checkoutSlug);assert.equal(publicPitch.nostrPubkey,pubkey);
+ const previewListing=await call('/api/nostr','POST',{action:'preview'},seller);assert.equal(previewListing.value.event.kind,30402);assert(!previewListing.value.event.content.includes('PRIVATE DELIVERY'));
+ const changed=finalizeEvent({...previewListing.value.event,content:'FORGED LISTING'},nostrKey);assert.equal((await call('/api/nostr','POST',{action:'sign_listing',event:changed},seller)).r.status,400);
+ const listing=finalizeEvent(previewListing.value.event,nostrKey);assert.equal((await call('/api/nostr','POST',{action:'sign_listing',event:listing},seller)).r.status,200);
+ assert.equal((await call('/api/nostr','POST',{action:'disconnect'},seller)).r.status,200);
+ assert.equal((await call('/api/profiles')).value.profiles.find(o=>o.slug===checkoutSlug).nostrPubkey,undefined);
+ console.log('Passed: auth, origin checks, publish validation, drafts, published snapshots, owner isolation, SSR portfolios, image upload/access, unpublishing, tipping validation, offer validation and enquiry links, legacy service compatibility, server-rendered discovery, performer actions, public card snapshot boundaries and unsafe-link rejection; opportunity agreement, delivery privacy, milestone invoice and payment confirmation; Nostr signature, replay protection and listing privacy.');
 }finally{await mf.dispose()}
 

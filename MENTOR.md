@@ -9,17 +9,21 @@ Updated 17 November 2026.
 
 ## What I am building
 
-A platform for expressing value. People make a pitch, explain what someone can
-come to them for, and show work supporting those offers. Visitors discover people
-by what they need, enquire about a specific offer, or support work with a tip.
+Taste helps people get paid for their skills. Professionals publish a pitch and
+clear offers. Buyers can post an outcome, budget and acceptance criteria, select
+one professional, and agree one to three milestones before work begins. The
+professional submits work privately; the buyer approves it and pays over
+Lightning into the professional's USD Flash Cash Wallet.
 
-The editor now has four steps: Your pitch, Your offers, Proof & contact, Review &
-publish. A person can publish up to three offers with a title, description and
-optional price. Evidence, skills and credentials support the offer lower down.
+The same account can hire and earn. A one-step bounty uses the same opportunity
+flow. There is no speculative contest or escrow. Optional Nostr connection proves
+control of a public key and lets a professional sign a public talent listing;
+it does not verify their qualifications.
 
-The use cases include an indoor plant stylist, lash stylist, fashion designer
-and street saxophonist. Keep the review focused on one complete opportunity journey.
-[Product direction and compatibility](docs/PRODUCT.md).
+The editor keeps four steps. We removed duplicate free-text offer pricing and
+separate experience/education entry forms. Existing background records remain
+available, with removal controls; new evidence goes through projects and links.
+[Paid work](docs/WORK.md) · [Nostr](docs/NOSTR.md).
 
 ## Where we are
 
@@ -32,7 +36,7 @@ and street saxophonist. Keep the review focused on one complete opportunity jour
 - M-Pesa and Lightning addresses are displayed and copied; optional tipping exposes those same details.
 - Published profiles have QR SVG downloads and a printable business-card sheet.
 - Review the added card route and print UI using [SHARING.md](docs/SHARING.md).
-- USD offer checkout is implemented with an explicit price, recipient lookup, validated invoice QR and provider status. See [CHECKOUT.md](docs/CHECKOUT.md). A funded payment is still untested.
+- USD offer checkout is implemented with an explicit price, recipient lookup, validated invoice QR and provider status. See [CHECKOUT.md](docs/CHECKOUT.md). The owner reports one offer payment confirmed. Wallet credit and funded milestone payments still need live verification.
 
 The latest application-code check passed before the documentation-only updates:
 TypeScript, build, auth, Flash and checkout tests plus Workers integration checks.
@@ -40,11 +44,11 @@ Auth-provider behaviour is simulated in these tests. Broader live acceptance is
 still pending. A separate unauthenticated HTTP probe to /api/profiles returned
 403 while account pages loaded. Please recheck public browsing in a normal
 browser and inspect Cloudflare logs before treating it as a confirmed app bug.
-No real payment has been sent in this work.
+No payment was sent by the assistant. The owner reported one confirmed USD 1.00 offer payment; new milestone payments use simulated provider responses in tests.
 
 ## The main technical help I need
 
-### 1. Review and verify USD offer checkout
+### 1. Review work agreements and milestone checkout
 
 The key is stored in Cloudflare and the owner reports a successful wallet access
 check. BTC invoice calls were rejected. The owner explicitly chose USD Cash Wallet
@@ -57,7 +61,7 @@ mainnet amount and expiry, and stores the immutable request in R2. Payment statu
 is queried server-side. The app never sends funds. See [CHECKOUT.md](docs/CHECKOUT.md)
 and [FLASH.md](docs/FLASH.md). Existing service prices were not converted or changed.
 
-Review `lib/flash-checkout.mjs`, the two checkout routes, `app/offer-checkout.tsx`
+Review `lib/opportunities.mjs`, `lib/nostr-talent.mjs`, `lib/work-schema.mjs`, `lib/flash-checkout.mjs`, the two checkout routes, `app/offer-checkout.tsx`
 and the checkout/integration tests. Best-effort in-memory burst protection is not
 a global rate limit. There is no dispute, refund, escrow or payment dashboard.
 Run one expressly authorised funded payment before claiming USD settlement works
@@ -113,7 +117,7 @@ to set values directly there; do not put secrets in a pull request or issue.
 
 ## Scope to protect
 
-Finish one strong portfolio and one verified Bitcoin payment story. Defer
+Finish one strong pitch, one agreed paid task and one verified Lightning payment story. New D1 tables are created idempotently at runtime; a matching Drizzle migration is included. Test an existing database as well as a fresh one. Defer
 leaderboards, messaging, scheduling, reviews, escrow, wallet custody and hiring
 algorithms. Preserve the maroon and gold interface.
 
