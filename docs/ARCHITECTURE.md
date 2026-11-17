@@ -112,4 +112,4 @@ See [SHARING.md](SHARING.md).
 
 ## Private Flash invoice pilot
 
-The owner-only invoice diagnostic uses the existing private R2 binding for one fixed-recipient test record, outside the assets namespace. It has no public checkout endpoint. Exact-origin checks, verified app identity and ownership of the fixed pilot profile gate creation/status access. The Flash account must control the target BTC wallet. See [FLASH.md](FLASH.md) for operation, retry and storage details.
+The owner-only invoice diagnostic uses the existing private R2 binding for one fixed-recipient test record, outside the assets namespace. It has no public checkout endpoint. Exact-origin checks, verified app identity and ownership of the fixed pilot profile gate creation/status access. The Flash account must control the target wallet in the explicitly selected currency. The current private UI uses USD Cash Wallet settlement; BTC mode remains only for regression checks. See [FLASH.md](FLASH.md) for operation, retry and storage details.

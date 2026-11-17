@@ -15,9 +15,13 @@ for (const [operation,data] of [
  ['recipient',{me:{defaultAccount:{wallets:[{id:'pilot-btc',walletCurrency:'BTC'}]}},recipient:{id:'pilot-btc',walletCurrency:'BTC'},globals:{network:'mainnet'}}],
  ['create',{lnInvoiceCreate:{errors:[],invoice:{paymentRequest:'lnbc210n1fixture',satoshis:21}}}],
  ['status',{lnInvoicePaymentStatus:{errors:[],status:'PENDING'}}],
+ ['usd-recipient',{me:{defaultAccount:{wallets:[{id:'pilot-usd',walletCurrency:'USD'}]}},recipient:{id:'pilot-usd',walletCurrency:'USD'},globals:{network:'mainnet'}}],
+ ['usd-create',{lnUsdInvoiceCreateOnBehalfOfRecipient:{errors:[],invoice:{paymentRequest:'lnbc10u1fixture',satoshis:null}}}],
+ ['usd-status',{lnInvoicePaymentStatus:{errors:[],status:'PENDING'}}],
 ]) {
  const mock=flashPool.intercept({path:'/graphql',method:'POST',headers:{'x-api-key':'fk_integration_fixture'}}).reply(200,{data});
- if(operation==='status')mock.persist();
+ if(operation==='status')mock.times(2);
+ if(operation==='usd-status')mock.persist();
 }
 const options=unstable_getMiniflareWorkerOptions('dist/server/wrangler.json');
 const rootDir=dirname(options.main);const files=readdirSync(rootDir,{recursive:true}).filter(f=>/\.m?js$/.test(f)&&f!=='index.js');const modules=['index.js',...files].map(f=>({type:'ESModule',path:resolve(rootDir,f)}));const mf=new Miniflare({...options.workerOptions,modules,modulesRoot:rootDir,cf:false,fetchMock,bindings:{...options.workerOptions.bindings,SUPABASE_URL:'https://test-project.supabase.co',SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test',FLASH_API_URL:'https://api.flashapp.me/graphql',FLASH_API_KEY:'fk_integration_fixture'}});
@@ -78,7 +82,7 @@ try{
  assert.equal((await call('/api/flash/invoice-test','POST',{action:'create'},{...otherIdentity,Origin:root})).r.status,403);
  await db.prepare('UPDATE portfolios SET slug=? WHERE owner_id=?').bind('viola-korir-dcd4b1a1','qa-portfolio-owner').run();
  const privateSettings=await mf.dispatchFetch(root+'/settings/flash',{headers:identity});
- assert((await privateSettings.text()).includes('Create 21-sat test invoice'));
+ assert((await privateSettings.text()).includes('Create $1 USD test invoice'));
  assert.equal((await call('/api/flash/invoice-test','POST',{action:'send'},{...identity,Origin:root})).r.status,400);
  const testInvoice=await call('/api/flash/invoice-test','POST',{action:'create'},{...identity,Origin:root});
  assert.equal(testInvoice.r.status,200,JSON.stringify(testInvoice.value));
@@ -88,9 +92,18 @@ try{
  const testInvoiceAgain=await call('/api/flash/invoice-test','POST',{action:'create'},{...identity,Origin:root});
  assert.equal(testInvoiceAgain.value.paymentStatus,'PENDING');
  assert.equal((await call('/api/flash/invoice-test','POST',{action:'status'},{...otherIdentity,Origin:root})).r.status,403);
+ assert.equal((await call('/api/flash/invoice-test','POST',{action:'create',currency:'USDT'},{...identity,Origin:root})).r.status,400);
+ const usdInvoice=await call('/api/flash/invoice-test','POST',{action:'create',currency:'USD'},{...identity,Origin:root});
+ assert.equal(usdInvoice.value.status,'created',JSON.stringify(usdInvoice.value));
+ assert.equal(usdInvoice.value.currency,'USD');assert.equal(usdInvoice.value.amount,100);assert.equal(usdInvoice.value.paymentStatus,'PENDING');
+ assert(!JSON.stringify(usdInvoice.value).includes('lnbc'));
+ const usdAgain=await call('/api/flash/invoice-test','POST',{action:'create',currency:'USD'},{...identity,Origin:root});
+ assert.equal(usdAgain.value.currency,'USD');assert.equal(usdAgain.value.paymentStatus,'PENDING');
  const bucket=await mf.getR2Bucket('BUCKET');
  const privateRecord=await bucket.get('internal/flash-invoice-test/qa-portfolio-owner.json');
  assert(privateRecord);assert((await privateRecord.json()).paymentRequest==='lnbc210n1fixture');
+ const usdRecord=await bucket.get('internal/flash-invoice-test/usd/qa-portfolio-owner.json');
+ assert(usdRecord);assert((await usdRecord.json()).paymentRequest==='lnbc10u1fixture');
  console.log('Passed: auth, origin checks, publish validation, drafts, published snapshots, owner isolation, SSR portfolios, image upload/access, unpublishing, tipping validation, offer validation and enquiry links, legacy service compatibility, server-rendered discovery, performer actions, public card snapshot boundaries and unsafe-link rejection.');
 }finally{await mf.dispose()}
 

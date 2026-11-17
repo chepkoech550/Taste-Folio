@@ -1,5 +1,12 @@
 # Changelog
 
+## USD Cash Wallet invoice pilot
+
+- Added an explicitly selected USD 1.00 private Lightning invoice test, settling to the pilot recipient’s USD wallet.
+- Used the verified USD recipient operation, handled nullable satoshis and checked the invoice’s encoded amount.
+- Kept USD test records separate from BTC failures and retained duplicate request protection.
+- Verified a live public USD invoice and PENDING status; no funded payment or public checkout was enabled.
+
 ## Private Flash Bitcoin invoice pilot
 
 - Added an owner-only, fixed-recipient 21-sat invoice test and provider status lookup.

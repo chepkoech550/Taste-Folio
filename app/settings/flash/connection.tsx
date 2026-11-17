@@ -16,16 +16,17 @@ const messages: Record<string, string> = {
 
 const invoiceMessages: Record<string, string> = {
   btc_unavailable: 'Flash rejected Bitcoin invoice creation: BTC wallets are not supported by this operation. No payable invoice was returned.',
-  recipient_mismatch: 'The saved key does not control the Bitcoin wallet for boodaboo. No invoice was requested.',
+  usd_unavailable: 'Flash rejected USD invoice creation: USD wallets are not supported by this operation. No payable invoice was returned.',
+  recipient_mismatch: 'The saved key does not control the USD Cash Wallet for boodaboo. No invoice was requested.',
   network_mismatch: 'Flash returned a different Bitcoin network. No invoice was requested.',
   permissions: 'Flash denied the invoice operation. Check the key permissions for invoice creation.',
   unauthorized: 'Flash rejected the credentials for the invoice test.',
   provider_error: 'Flash did not return a successful invoice response. Invoice creation remains unverified.',
   invalid_invoice: 'Flash returned an unexpected invoice amount or network. The invoice has not been exposed for payment.',
   no_invoice: 'No private test invoice has been created yet.',
-  creation_pending: 'A test request is already in progress or its result is uncertain. To avoid duplicate invoices, wait 11 minutes before creating another.',
-  timeout: 'The Flash request timed out. Creation may have reached Flash. Use Check invoice status; a new request is blocked for 11 minutes.',
-  unavailable: 'The Flash request failed. Creation may have reached Flash. A new request is blocked for 11 minutes.',
+  creation_pending: 'A test request is already in progress or its result is uncertain. To avoid duplicate invoices, wait 6 minutes before creating another.',
+  timeout: 'The Flash request timed out. Creation may have reached Flash. Use Check USD invoice status; a new request is blocked for 6 minutes.',
+  unavailable: 'The Flash request failed. Creation may have reached Flash. A new request is blocked for 6 minutes.',
   storage_unavailable: 'The private test record could not be read or saved. Do not retry invoice creation until storage is working.',
   environment_changed: 'The test record belongs to a different Flash environment. Ask the maintainer to review it before another test.',
 };
@@ -53,13 +54,13 @@ export default function FlashConnection({ canTestInvoice = false }: { canTestInv
     setInvoiceMessage('');
     try {
       const result = await fetch('/api/flash/invoice-test', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action }),
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, currency: 'USD' }),
       });
-      const body = await result.json() as { status?: string; error?: string; paymentStatus?: string; statusCheck?: string };
+      const body = await result.json() as { status?: string; error?: string; paymentStatus?: string; statusCheck?: string; currency?: string; amount?: number; satoshis?: number };
       if (!result.ok) setInvoiceMessage(body.error || 'The invoice test could not complete.');
-      else if (body.status === 'created') {
+      else if (body.status === 'created' && body.currency === 'USD' && body.amount === 100) {
         const state = body.paymentStatus === 'PENDING' ? 'Flash confirms it is awaiting payment.' : body.paymentStatus === 'PAID' ? 'Flash confirms it is paid.' : body.paymentStatus === 'EXPIRED' ? 'Flash confirms it has expired.' : 'The payment status check has not succeeded.';
-        setInvoiceMessage('Flash created a 21-sat Bitcoin invoice for boodaboo. ' + state + ' This private test does not enable offer checkout.');
+        setInvoiceMessage('Flash created a Lightning invoice for USD 1.00 into boodaboo’s Cash Wallet. ' + state + ' This private test does not enable offer checkout.');
       } else setInvoiceMessage(invoiceMessages[body.status || 'provider_error'] || messages[body.status || 'provider_error'] || invoiceMessages.provider_error);
     } catch {
       setInvoiceMessage('The test response could not be read. Use Check invoice status before attempting creation again.');
@@ -74,11 +75,12 @@ export default function FlashConnection({ canTestInvoice = false }: { canTestInv
     <button className="primary" disabled={busy} onClick={check}>{busy ? 'Checking Flash…' : 'Check connection'}</button>
     <p role="status" aria-live="polite">{message}</p>
     {canTestInvoice && <section aria-labelledby="invoice-test-heading">
-      <h2 id="invoice-test-heading">Private Bitcoin invoice test</h2>
-      <p>Request a 21-sat invoice for boodaboo, expiring in 10 minutes. The server first verifies that the saved key controls this recipient’s Bitcoin wallet.</p>
+      <h2 id="invoice-test-heading">Private USD invoice test</h2>
+      <p>Request a Lightning invoice for USD 1.00 into boodaboo’s Flash Cash Wallet, expiring in 5 minutes. The server first verifies that the saved key controls this recipient’s USD wallet.</p>
+      <p>The payer would pay Bitcoin over Lightning. The recipient would receive a USD cash balance in Flash.</p>
       <p>This uses real Bitcoin mainnet. The test sends no money and keeps the payable invoice private.</p>
-      <button className="primary" disabled={busy || invoiceBusy} onClick={() => testInvoice('create')}>{invoiceBusy ? 'Checking invoice…' : 'Create 21-sat test invoice'}</button>{' '}
-      <button disabled={busy || invoiceBusy} onClick={() => testInvoice('status')}>Check invoice status</button>
+      <button className="primary" disabled={busy || invoiceBusy} onClick={() => testInvoice('create')}>{invoiceBusy ? 'Checking invoice…' : 'Create $1 USD test invoice'}</button>{' '}
+      <button disabled={busy || invoiceBusy} onClick={() => testInvoice('status')}>Check USD invoice status</button>
       <p role="status" aria-live="polite">{invoiceMessage}</p>
     </section>}
   </main>;

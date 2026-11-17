@@ -1,12 +1,13 @@
 # Flash integration status
 
-Checked 17 November 2026. Requested settlement: Bitcoin. The owner chose to
-keep Bitcoin rather than investigate USD settlement.
+Checked 17 November 2026. Current approved settlement: USD in Flash Cash Wallet.
+The owner explicitly chose this after both tested BTC invoice operations were rejected.
+Payers use Bitcoin Lightning; recipients receive a USD balance. This is not USDT.
 
 ## Intended payment journey
 
 A client opens a professional's published portfolio, agrees the scope and amount,
-requests a Lightning invoice credited to that professional's BTC wallet, pays in
+requests a Lightning invoice credited to that professional's USD Cash Wallet, pays in
 their own wallet, and sees receipt confirmed by Flash. Taste Folio does not
 receive payments into a shared platform wallet.
 
@@ -99,6 +100,21 @@ rewards or tips from Taste Folio through `lnInvoicePaymentSend` spends from a
 funded account controlled by that key. That is a separate payout and funding
 flow. No payout endpoint is currently implemented.
 
+## Live USD receiving probe
+
+On 17 November, a bounded public recipient probe resolved the owner-supplied USD
+wallet and called `lnUsdInvoiceCreateOnBehalfOfRecipient` with amount 100
+(FractionalCentAmount = USD cents, so USD 1.00), five-minute expiry and an unpaid
+test memo. Flash returned a mainnet Lightning payment request. Its `satoshis`
+field was null. A subsequent `lnInvoicePaymentStatus` query returned PENDING
+with no errors. No money was sent, and the payable string was not exposed or
+saved in the repository. This proves invoice creation and pending-state lookup,
+not paid settlement, merchant eligibility or cash withdrawal availability.
+
+The private USD test uses this same recipient mutation, with an extra verified-key
+wallet-ownership check before creation. A live run of that private route is still
+needed with the deployed credentials.
+
 ## Private invoice test
 
 The settings page now includes an owner-only pilot for the existing profile slug
@@ -106,22 +122,31 @@ The settings page now includes an owner-only pilot for the existing profile slug
 that exact D1 record. This is a temporary, explicit pilot restriction, not a role
 system or a generic Flash account connection mechanism.
 
-`POST /api/flash/invoice-test` accepts only `{ "action": "create" }` or
-`{ "action": "status" }`, with an exact same-origin Origin header. No client can
-choose an amount, recipient, wallet ID or invoice string.
+`POST /api/flash/invoice-test` accepts action create or status, plus currency USD
+or BTC, with an exact same-origin Origin header. Omitted currency retains BTC
+for older clients. The current UI explicitly selects USD. USDT is rejected.
+No client can choose an amount, recipient, wallet ID or invoice string.
 
-Before creation it looks up the fixed recipient's BTC wallet and verifies that
-the authenticated Flash account controls that wallet. It checks mainnet, then
-calls authenticated `lnInvoiceCreate` for 21 sats with a ten-minute expiry. There
-is no USD fallback and no payment-send operation. It rejects unexpected returned
-amounts and invoice network prefixes. It does not expose an invoice QR or payment
-string: this private probe is not checkout and must not be advertised as one.
+Before creation it looks up the fixed recipient's wallet in the selected currency
+and verifies that the authenticated Flash account controls that wallet. It checks
+mainnet. USD mode requests 100 cents with a five-minute expiry through
+`lnUsdInvoiceCreateOnBehalfOfRecipient`. The earlier BTC mode remains available
+only for controlled regression checks (21 sats, ten-minute expiry); the UI no
+longer offers it. Currency selection is explicit and there is no silent fallback.
+No operation sends a payment. The private probe does not expose an invoice QR or
+payment string and must not be advertised as public checkout.
+
+Returned invoices must encode a positive mainnet amount with millisatoshi
+precision. If Flash provides satoshis, that field must match the encoded amount.
+USD invoices can have satoshis:null, in which case the amount is derived from
+the invoice prefix. BTC mode must match exactly 21 sats. This is an amount/network
+prefix check, not full BOLT11 signature or checksum verification.
 
 The pilot record is stored under `internal/flash-invoice-test/<owner-id>.json` in
-the existing private R2 bucket. It contains the provider's payment request for
+the existing private R2 bucket. USD uses a separate `usd/` subdirectory, so a prior BTC failure cannot block or be mistaken for a USD invoice. It contains the provider's payment request for
 server-side status queries. It is not an asset record and cannot be fetched via
 the media API. Conditional R2 writes reserve the test across Worker instances.
-For eleven minutes repeated creation requests reuse the saved invoice, or remain
+For six minutes in USD mode (eleven in BTC mode), repeated creation requests reuse the saved invoice, or remain
 blocked if a creation result was uncertain. Network failures never cause an
 automatic mutation retry. A key/environment change requires review of the prior
 record before a new test.
@@ -129,12 +154,9 @@ record before a new test.
 Status queries use the stored paymentRequest. Only Flash's PENDING, PAID and
 EXPIRED results are recognised. A failed status lookup remains unverified.
 The owner must click the private test button to run it using runtime credentials.
-Tests use synthetic invoices and mocked Flash replies; no real invoice or funded
-payment has been verified by these automated tests.
+Automated tests use synthetic invoices and mocked Flash replies. The separate live public USD probe above generated a real unpaid invoice; no funded payment has been tested.
 
-If this authenticated operation also rejects BTC, send Flash support the operation
-name, endpoint and safe error message. Do not include the API key. Public offer
-checkout must wait until Bitcoin invoice creation and recipient routing work.
+The owner reported that the private BTC operation also rejects BTC wallets. Keep that path disabled for public checkout. Public USD offer checkout still needs explicit USD offer pricing, a durable offer-bound payment record, recipient routing, full invoice validation and a real paid-state test. Never include an API key in support messages.
 
 ## Current product behaviour
 

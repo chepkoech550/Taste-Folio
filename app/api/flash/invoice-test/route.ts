@@ -10,15 +10,18 @@ export async function POST(request: Request) {
   const allowed = await db().prepare('SELECT owner_id FROM portfolios WHERE slug=?').bind(FLASH_TEST_OWNER_SLUG).first<{ owner_id: string }>();
   if (allowed?.owner_id !== user) return response({ error: 'This private invoice test is available only to the pilot owner.' }, 403);
   if (Number(request.headers.get('content-length') || 0) > 100) return response({ error: 'Invalid request.' }, 400);
-  let action;
+  let action, currency;
   try {
     const raw = await request.text();
     if (raw.length > 100) return response({ error: 'Invalid request.' }, 400);
-    action = JSON.parse(raw).action;
+    const body = JSON.parse(raw);
+    action = body.action;
+    currency = body.currency ?? 'BTC';
   } catch { return response({ error: 'Invalid request.' }, 400); }
   if (action !== 'create' && action !== 'status') return response({ error: 'Invalid action.' }, 400);
+  if (currency !== 'BTC' && currency !== 'USD') return response({ error: 'Invalid settlement currency.' }, 400);
   try {
-    return response(await flashInvoiceTest(env, user, action));
+    return response(await flashInvoiceTest(env, user, action, fetch, currency));
   } catch {
     return response({ status: 'storage_unavailable' });
   }

@@ -52,13 +52,15 @@ test('redirects never forward credentials and unreadable responses are distinct'
 });
 
 function testBucket() {
-  let value = null, etag = 0;
+  const entries = new Map();
+  let etag = 0;
   return {
-    async get() { return value === null ? null : { etag: String(etag), json: async () => JSON.parse(value) }; },
-    async put(_key, next, options) {
-      if (options?.onlyIf?.etagDoesNotMatch === '*' && value !== null) return null;
-      if (options?.onlyIf?.etagMatches && options.onlyIf.etagMatches !== String(etag)) return null;
-      value = next; etag++; return { etag: String(etag) };
+    async get(key) { const item = entries.get(key); return item ? { etag: item.etag, json: async () => JSON.parse(item.value) } : null; },
+    async put(key, next, options) {
+      const item = entries.get(key);
+      if (options?.onlyIf?.etagDoesNotMatch === '*' && item) return null;
+      if (options?.onlyIf?.etagMatches && options.onlyIf.etagMatches !== item?.etag) return null;
+      const tag = String(++etag); entries.set(key, { etag: tag, value: next }); return { etag: tag };
     },
   };
 }
@@ -127,7 +129,46 @@ test('wrong amount stays private and provider failures never become PAID', async
   });
   assert.equal(result.status, 'invalid_invoice');
   const saved = { endpoint: env.FLASH_API_URL, paymentRequest: 'lnbc210n1fixture', lockUntil: Date.now() + 60000 };
-  const stored = testBucket(); await stored.put('unused', JSON.stringify(saved));
+  const stored = testBucket(); await stored.put('internal/flash-invoice-test/owner.json', JSON.stringify(saved));
   const failed = await flashInvoiceTest({ ...env, BUCKET: stored }, 'owner', 'status', async () => Response.json({ errors: [{ message: 'Service unavailable' }] }));
   assert.equal(failed.status, 'created'); assert.equal(failed.paymentStatus, undefined);
+});
+
+test('USD test uses 100 cents, a verified USD wallet and five-minute expiry without reusing BTC failures', async () => {
+  const BUCKET = testBucket();
+  await BUCKET.put('internal/flash-invoice-test/owner.json', JSON.stringify({ status: 'btc_unavailable', lockUntil: Date.now() + 600000, endpoint: env.FLASH_API_URL }));
+  let creates = 0;
+  const fetcher = async (_url, init) => {
+    const { query, variables } = JSON.parse(init.body);
+    assert.equal(init.headers['X-API-KEY'], env.FLASH_API_KEY);
+    if (query.includes('TasteFolioInvoiceRecipient')) {
+      assert(query.includes('walletCurrency: USD'));
+      return Response.json({ data: { ...prepared, me: { defaultAccount: { wallets: [{ id: 'cash-wallet', walletCurrency: 'USD' }] } }, recipient: { id: 'cash-wallet', walletCurrency: 'USD' } } });
+    }
+    if (query.includes('mutation')) {
+      creates++; assert(query.includes('lnUsdInvoiceCreateOnBehalfOfRecipient')); assert(!query.includes('lnInvoiceCreate('));
+      assert.deepEqual(variables.input, { recipientWalletId: 'cash-wallet', amount: 100, expiresIn: 5, memo: 'Taste Folio private USD invoice test' });
+      return Response.json({ data: { lnUsdInvoiceCreateOnBehalfOfRecipient: { errors: [], invoice: { paymentRequest: 'lnbc10u1fixture', satoshis: null } } } });
+    }
+    assert.equal(variables.input.paymentRequest, 'lnbc10u1fixture');
+    return Response.json({ data: { lnInvoicePaymentStatus: { errors: [], status: 'PENDING' } } });
+  };
+  const configured = { ...env, BUCKET };
+  const first = await flashInvoiceTest(configured, 'owner', 'create', fetcher, 'USD');
+  assert.deepEqual(first, { status: 'created', paymentStatus: 'PENDING', amount: 100, currency: 'USD', amountUnit: 'cents', satoshis: 1000, recipient: 'boodaboo', network: 'mainnet' });
+  assert(!JSON.stringify(first).includes('lnbc'));
+  assert.equal((await flashInvoiceTest(configured, 'owner', 'create', fetcher, 'USD')).paymentStatus, 'PENDING');
+  assert.equal(creates, 1);
+  assert.equal((await (await BUCKET.get('internal/flash-invoice-test/owner.json')).json()).status, 'btc_unavailable');
+});
+
+test('USD test rejects a BTC-only recipient and invoices whose encoded amount differs', async () => {
+  let mutations = 0;
+  assert.equal((await flashInvoiceTest({ ...env, BUCKET: testBucket() }, 'owner', 'create', async () => Response.json({ data: prepared }), 'USD')).status, 'recipient_mismatch');
+  const result = await flashInvoiceTest({ ...env, BUCKET: testBucket() }, 'owner', 'create', async (_url, init) => {
+    if (!JSON.parse(init.body).query.includes('mutation')) return Response.json({ data: { ...prepared, me: { defaultAccount: { wallets: [{ id: 'usd', walletCurrency: 'USD' }] } }, recipient: { id: 'usd', walletCurrency: 'USD' } } });
+    mutations++;
+    return Response.json({ data: { lnUsdInvoiceCreateOnBehalfOfRecipient: { errors: [], invoice: { paymentRequest: 'lnbc10u1fixture', satoshis: 2000 } } } });
+  }, 'USD');
+  assert.equal(result.status, 'invalid_invoice'); assert.equal(mutations, 1);
 });
