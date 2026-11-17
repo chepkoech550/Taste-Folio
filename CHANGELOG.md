@@ -1,5 +1,11 @@
 # Changelog
 
+## Flash connection runtime fix
+
+- Replaced an unsupported Cloudflare redirect mode that prevented the check from reaching Flash. Redirects remain blocked without forwarding credentials.
+- Distinguished timeouts, unreadable responses and rejected redirects.
+- Added a configured-key Workers integration test and extended safe error handling tests.
+
 ## Flash connection diagnostic
 
 - Added a signed-in Flash connection check using the credentials stored in Cloudflare.

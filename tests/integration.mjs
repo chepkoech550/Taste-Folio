@@ -7,8 +7,10 @@ const fetchMock=createFetchMock();fetchMock.disableNetConnect();
 const authPool=fetchMock.get('https://test-project.supabase.co');
 for(const [token,id,email] of [['qa-owner','qa-portfolio-owner','qa@example.test'],['qa-other','qa-other','other@example.test'],['qa-legacy','qa-legacy','legacy@example.test']]) authPool.intercept({path:'/auth/v1/user',method:'GET',headers:{authorization:'Bearer '+token}}).reply(200,{id,email}).persist();
 authPool.intercept({path:'/auth/v1/token?grant_type=password',method:'POST'}).reply(200,{access_token:'qa-owner',refresh_token:'qa-refresh',expires_in:3600}).persist();
+const flashPool=fetchMock.get('https://api.flashapp.me');
+flashPool.intercept({path:'/graphql',method:'POST',headers:{'x-api-key':'fk_integration_fixture'}}).reply(200,{data:{me:{defaultAccount:{wallets:[{walletCurrency:'BTC',id:'private-fixture-wallet'}]}}}}).persist();
 const options=unstable_getMiniflareWorkerOptions('dist/server/wrangler.json');
-const rootDir=dirname(options.main);const files=readdirSync(rootDir,{recursive:true}).filter(f=>/\.m?js$/.test(f)&&f!=='index.js');const modules=['index.js',...files].map(f=>({type:'ESModule',path:resolve(rootDir,f)}));const mf=new Miniflare({...options.workerOptions,modules,modulesRoot:rootDir,cf:false,fetchMock,bindings:{...options.workerOptions.bindings,SUPABASE_URL:'https://test-project.supabase.co',SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test'}});
+const rootDir=dirname(options.main);const files=readdirSync(rootDir,{recursive:true}).filter(f=>/\.m?js$/.test(f)&&f!=='index.js');const modules=['index.js',...files].map(f=>({type:'ESModule',path:resolve(rootDir,f)}));const mf=new Miniflare({...options.workerOptions,modules,modulesRoot:rootDir,cf:false,fetchMock,bindings:{...options.workerOptions.bindings,SUPABASE_URL:'https://test-project.supabase.co',SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test',FLASH_API_URL:'https://api.flashapp.me/graphql',FLASH_API_KEY:'fk_integration_fixture'}});
 try{
  const db=await mf.getD1Database('DB');for(const sql of readFileSync('drizzle/0000_fat_daredevil.sql','utf8').split('--> statement-breakpoint').filter(s=>s.trim()))await db.prepare(sql).run();
  const root='https://ownwork.test';
@@ -23,7 +25,7 @@ try{
  assert.equal((await call('/api/flash/connection','POST',undefined,identity)).r.status,403);
  assert.equal((await call('/api/flash/connection','POST',undefined,{...identity,Origin:'https://attacker.example'})).r.status,403);
  const flashCheck=await call('/api/flash/connection','POST',undefined,{...identity,Origin:root});
- assert.equal(flashCheck.r.status,200);assert.equal(flashCheck.value.status,'not_configured');
+ assert.equal(flashCheck.r.status,200);assert.equal(flashCheck.value.status,'connected');assert(!JSON.stringify(flashCheck.value).includes('fixture'));
  assert.equal(flashCheck.r.headers.get('cache-control'),'private, no-store');
  const flashSettings=await mf.dispatchFetch(root+'/settings/flash',{headers:identity});
  assert.equal(flashSettings.status,200);assert((await flashSettings.text()).includes('Check connection'));

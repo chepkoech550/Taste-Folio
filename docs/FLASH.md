@@ -89,7 +89,7 @@ only a wallet-read query, returns a generic status and never exposes account dat
 or provider error bodies. It requires an exact same-origin Origin header.
 All signed-in Taste Folio users can run this shared deployment connection check;
 it does not link their individual Flash accounts. Only the two official endpoint
-URLs are allowed, redirects are disabled and requests time out after 8 seconds.
+URLs are allowed, redirects are disabled and requests time out after 20 seconds. Redirects use manual mode and all 3xx responses are rejected without forwarding credentials. Workers does not support redirect:error; the original diagnostic used that unsupported option and failed before contacting Flash. The configured-key integration test now runs the outbound request through the real Workers runtime to prevent that regression.
 A successful check verifies wallet-read access only, not Bitcoin invoice support.
 The query may require additional read permissions depending on Flash's scope mapping. API credentials must be set privately in the runtime,
 not in portfolio fields, GitHub or chat.

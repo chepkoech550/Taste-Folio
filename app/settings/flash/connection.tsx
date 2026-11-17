@@ -8,6 +8,9 @@ const messages: Record<string, string> = {
   unauthorized: 'Flash rejected the key. Check that it is active and belongs to the selected Flash environment.',
   permissions: 'Flash accepted the request but denied wallet access. Check the key permissions in Flash. Additional permissions may be required for this query.',
   provider_error: 'Flash did not return a successful wallet response. The connection is not verified. Check the current Flash API permissions and service status.',
+  redirect_rejected: 'Flash redirected the request. The check stopped without forwarding your key. Check that FLASH_API_URL is the exact GraphQL endpoint.',
+  invalid_response: 'Flash responded, but did not return readable API data. Your key has not been verified.',
+  timeout: 'Flash did not finish responding within 20 seconds. Your key has not been verified. Try the check again shortly.',
   unavailable: 'Flash could not be reached successfully. Try again shortly.',
 };
 
