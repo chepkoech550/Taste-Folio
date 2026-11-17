@@ -156,17 +156,15 @@ EXPIRED results are recognised. A failed status lookup remains unverified.
 The owner must click the private test button to run it using runtime credentials.
 Automated tests use synthetic invoices and mocked Flash replies. The separate live public USD probe above generated a real unpaid invoice; no funded payment has been tested.
 
-The owner reported that the private BTC operation also rejects BTC wallets. Keep that path disabled for public checkout. Public USD offer checkout still needs explicit USD offer pricing, a durable offer-bound payment record, recipient routing, full invoice validation and a real paid-state test. Never include an API key in support messages.
+The owner reported that the private BTC operation also rejects BTC wallets. Keep that path disabled for public checkout. Public USD offer checkout now includes explicit offer pricing, an offer-bound R2 record, recipient routing and BOLT11 validation. A real funded settlement test is still required. Never include an API key in support messages.
 
 ## Current product behaviour
 
 The portfolio can display a reusable Lightning address and let visitors copy it.
-Public offer invoice creation and QR checkout remain unimplemented. A private, fixed-recipient invoice test is implemented as described below. No simulated payment success or currency conversion was added.
+Public USD offer invoice creation, QR/wallet checkout and provider status handling are now implemented. See [CHECKOUT.md](CHECKOUT.md) for setup. The private diagnostic remains available. No simulated payment success or currency conversion was added.
 
-Before adding those features, verify invoice amount, recipient, Bitcoin network
-and expiry; bind records server-side to the published portfolio; handle retries
-without duplicate invoices; and mark PAID only after a provider-confirmed result.
-A separate payment-record migration will be needed when that path is implemented.
+The implemented checkout validates invoice network, amount and expiry, binds the recipient and USD price to a published offer, reuses an issued invoice on retries and marks PAID only after a provider-confirmed result.
+Checkout payment snapshots and provider state are stored privately in R2; no D1 migration is required.
 
 ## Sources
 
@@ -176,3 +174,7 @@ A separate payment-record migration will be needed when that path is implemented
 - https://docs.flashapp.me/guides/api-keys
 - https://userdocs.flashapp.me/guides/bitcoin-wallet/
 
+
+## Public checkout implementation
+
+The public button is opt-in through an explicit offer usdPrice and Flash address. It uses the verified USD recipient mutation, validates BOLT11 through BitcoinJS bolt11, stores an immutable R2 payment record and queries provider status. The key never reaches the browser and no spend/payout operation is exposed. [Setup, retry and review notes](CHECKOUT.md).

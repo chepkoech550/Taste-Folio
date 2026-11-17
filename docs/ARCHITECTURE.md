@@ -12,8 +12,8 @@ The original private Sites preview has a separate source and authentication gate
 | Cloudflare Worker | Request handling and trusted identity boundary |
 | Supabase Auth | Account credentials, verified identity and session renewal |
 | Cloudflare D1 | Portfolio drafts, published snapshots and image ownership |
-| Cloudflare R2 | Uploaded image bytes |
-| Flash | Intended invoice/status provider; not integrated into the running app |
+| Cloudflare R2 | Uploaded image bytes and private immutable payment records |
+| Flash | USD-settled recipient invoices and payment-status queries |
 
 ## Authentication
 
@@ -67,7 +67,8 @@ access on subsequent requests.
 | --- | --- | --- |
 | `/` | Browse and search portfolios | Public app route; verify live access separately |
 | `/edit` | Editor and local drafting | Account required for server saves, uploads and publishing |
-| `/p/[slug]` | Published portfolio | Published snapshot |\n| `/p/[slug]/card` | QR download and business-card printing | Published snapshot only; unpublished returns 404 |
+| `/p/[slug]` | Published portfolio | Published snapshot |
+| `/p/[slug]/card` | QR download and business-card printing | Published snapshot only; unpublished returns 404 |
 | `/auth/sign-in`, `/auth/sign-up` | Account forms | Public; POST requires origin and CSRF checks |
 | `/auth/sign-out` | Sign out confirmation | POST clears session |
 | `/signin-with-chatgpt` | Legacy sign in link | Routed to standalone account flow in production |
@@ -89,13 +90,20 @@ The platform does not independently verify credentials.
 
 ## Payment boundary
 
-M-Pesa and Lightning receiving information is display-only. The current code has
-no payment ledger, Flash client, automatic invoice or payout handler.
+Published offers with an explicit usdPrice and a username@flashapp.me address
+show Pay with Lightning. The server resolves the recipient's USD wallet from the
+published address and reads the amount from the published offer. Buyer-supplied
+prices and recipients are ignored. USD settlement is explicit; original free-text
+rates remain available and are never automatically converted.
 
-The desired BTC flow is client wallet to professional wallet, with provider-confirmed
-receipt. An API key authenticates access to its owning Flash account; it does not
-establish authority to spend every portfolio user's funds. Platform-funded payouts
-must be designed separately. [Flash status and evidence](FLASH.md).
+POST /api/checkout requires an exact Origin, a UUID idempotency token and a published
+offer. R2 conditional writes reserve invoice creation. The record contains the
+published offer identity, price, Flash destination and validated BOLT11 invoice.
+GET /api/checkout/[id] queries only that stored invoice, caches checks briefly and
+never downgrades PAID. The UUID is a bearer receipt reference and cannot be listed
+through the app. Both responses bypass shared caches. No buyer account is needed.
+The app never initiates a payment or payout; the payer confirms in their own wallet.
+See [CHECKOUT.md](CHECKOUT.md) for bounds and remaining live checks.
 
 ## QR sharing and tipping actions
 

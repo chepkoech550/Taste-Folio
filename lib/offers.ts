@@ -1,5 +1,5 @@
 import type {Portfolio} from './portfolio';
-export type Offer={id:string;title:string;description:string;price:string};
+export type Offer={id:string;title:string;description:string;price:string;usdPrice?:string};
 // An absent offers field identifies an older record. An explicit empty array
 // means the owner removed all offers; never silently resurrect a legacy service.
 export function offersFor(p:Portfolio):Offer[]{
@@ -17,3 +17,4 @@ export function enquiryLink(p:Portfolio,title?:string){
  if(p.email)return `mailto:${p.email}?subject=${encodeURIComponent(title?'Enquiry: '+title:'Let’s work together')}&body=${encodeURIComponent(message)}`;
  return '';
 }
+

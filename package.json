@@ -13,13 +13,14 @@
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
     "typecheck": "tsc --noEmit",
-    "test": "node --test tests/auth.test.mjs tests/flash.test.mjs && node tests/integration.mjs",
+    "test": "node --test tests/auth.test.mjs tests/flash.test.mjs tests/checkout.test.mjs && node tests/integration.mjs",
     "check": "npm run typecheck && npm run build && npm test"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
     "@hookform/resolvers": "^5.7.1",
     "@shadcn/react": "^0.3.0",
+    "bolt11": "^1.4.2",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "cmdk": "^1.1.1",
@@ -73,4 +74,3 @@
   },
   "description": "Portfolio publishing with skills supported by project evidence"
 }
-

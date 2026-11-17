@@ -45,6 +45,7 @@ export default defineConfig(async ({ command }) => {
   const { cloudflare } = await import("@cloudflare/vite-plugin");
 
   return {
+    resolve: { alias: { secp256k1: 'secp256k1/elliptic.js' } },
     server: {
       ...(managedLinux
         ? { host: "0.0.0.0", allowedHosts: ["terminal.local"] }
@@ -91,3 +92,4 @@ export default defineConfig(async ({ command }) => {
     ],
   };
 });
+

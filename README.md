@@ -17,7 +17,7 @@ Product direction: Viola Kipkorir. Visual identity: maroon and gold.
 
 ## Current status
 
-Updated 16 November 2026. This is a hackathon MVP in active development.
+Updated 17 November 2026. This is a hackathon MVP in active development.
 
 | Area | Current evidence |
 | --- | --- |
@@ -26,9 +26,12 @@ Updated 16 November 2026. This is a hackathon MVP in active development.
 | Supabase authentication | Connected; signup origin error fixed; owner reports creating a profile |
 | Portfolio editor and publication | Implemented; draft, publication and ownership flows pass isolated integration tests |
 | Project evidence, skills, experience and credentials | Implemented |
-| Pitch and up to three specific offers | Implemented, with title, benefit/scope and optional price |\n| Offer-specific email and WhatsApp enquiries | Implemented |\n| Discovery by need, skill, name or place | Implemented; public listings render on the server |
-| M-Pesa and Lightning receiving details | Display and copy; optional Leave a tip action |\n| QR sharing and business cards | QR SVG download and ten-card A4 print sheet, from published profiles |
-| Flash automatic invoices and payment confirmation | Pending API credentials, verified BTC support and implementation |
+| Pitch and up to three specific offers | Implemented, with title, benefit/scope and optional price |
+| Offer-specific email and WhatsApp enquiries | Implemented |
+| Discovery by need, skill, name or place | Implemented; public listings render on the server |
+| M-Pesa and Lightning receiving details | Display and copy; optional Leave a tip action |
+| QR sharing and business cards | QR SVG download and ten-card A4 print sheet, from published profiles |
+| Flash USD offer checkout | Implemented: explicit USD price, Flash recipient, invoice QR/wallet action and provider status; local checks pass; funded settlement not yet tested |
 | Live testing with all three initial users | Pending |
 | Project licence | Not selected |
 
@@ -36,19 +39,29 @@ The owner's successful profile creation is a user report. It does not establish
 that every production upload, publication, email or account recovery flow has
 been tested. [Testing](docs/TESTING.md) distinguishes automated and live evidence.
 
-## Express value and share it\n\nPublish a portfolio, then choose **Get QR code & business card** in Review & publish.\nDownload the QR SVG for your own cards or signs, or print the supplied business-card sheet.\nIn Proof & contact, **Accept tips for my work** adds a tip action using the receiving\ndetails already supported. Performance clips use project evidence links. Existing services/rates appear as a legacy offer; saved data and /p/ links remain compatible.\n[Sharing and printing guide](docs/SHARING.md).\n\nSee [the product direction](docs/PRODUCT.md) for the value-first flow and data compatibility.\n\n## Help needed from a mentor
+## Express value and share it
 
-1. Confirm how to obtain an authenticated Flash API key and a matching test account.
-2. Verify the supported BTC invoice operation. The public recipient-invoice call
-   rejected a valid production BTC recipient with
-   `Flash does not support BTC wallets.`.
-3. Review the standalone authentication boundary and test with two accounts.
-4. Help ship one complete client payment or tip journey, with the correct recipient
-   and provider-confirmed receipt.
+Publish a portfolio, then choose **Get QR code & business card** in Review & publish.
+Download the QR SVG for your own cards or signs, or print the supplied business-card sheet.
+In Proof & contact, **Accept tips for my work** adds a tip action using the receiving
+details already supported. Performance clips use project evidence links. Existing services/rates appear as a legacy offer; saved data and /p/ links remain compatible.
+[Sharing and printing guide](docs/SHARING.md).
 
-The private authenticated invoice operation has **not** been tested. The public
-operation's failure does not establish that every Flash BTC API route is unavailable.
-Both supplied endpoints reported `mainnet`; a testing hostname is not proof of test coins.
+See [the product direction](docs/PRODUCT.md) for the value-first flow and data compatibility.
+
+## Help needed from a mentor
+
+1. Review the USD offer checkout and recipient/price binding.
+2. Run one explicitly agreed funded payment to verify the recipient's Cash Wallet balance.
+3. Review account recovery, two-account isolation and pilot onboarding.
+4. Confirm Flash account eligibility and settlement behaviour for each pilot professional.
+
+The saved Flash key passes the wallet-read check. BTC invoice operations were
+rejected, so the owner explicitly chose USD Cash Wallet settlement. A live public
+USD recipient invoice was generated and returned PENDING; the owner subsequently
+reported successful creation and EXPIRED status through the private test.
+Both supplied endpoints reported mainnet. No funded transfer has been performed.
+[Enable Pay with Lightning on an offer](docs/CHECKOUT.md).
 
 Start with [MENTOR.md](MENTOR.md) for a bounded review, entry points and next tasks.
 
@@ -86,7 +99,8 @@ integration tests. Tests use isolated storage and a simulated auth provider.
 | [docs/SETUP.md](docs/SETUP.md) | Local development |
 | [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md) | Deployment and runtime configuration |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Authentication, data flow and routes |
-| [docs/FLASH.md](docs/FLASH.md) | Payment scope, observed errors and missing credentials |
+| [docs/FLASH.md](docs/FLASH.md) | Flash evidence, USD settlement and private diagnostic |
+| [docs/CHECKOUT.md](docs/CHECKOUT.md) | Enable an offer and understand checkout behaviour |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Remaining MVP work and completion criteria |
 | [docs/TESTING.md](docs/TESTING.md) | Checks, evidence and live acceptance tasks |
 | [docs/DEMO.md](docs/DEMO.md) | Demo and submission preparation |
@@ -106,9 +120,10 @@ earlier Vercel setup. Generated Worker configuration is in `dist/server/wrangler
 The original Sites preview is historical and remains separate:
 https://ownwork-creative-portfolios.indigo-plum-6650.chatgpt.site
 
-There is no Flash checkout, payment ledger, automated payout, automatic M-Pesa
-processing, escrow or independent credential verification yet. Receiving details
-alone do not confirm that a payment was made. Publishing does not guarantee employment.
+USD-priced offers can use Flash Lightning checkout with durable R2 payment records.
+M-Pesa and generic Lightning tipping details remain display-only. Automated payouts,
+M-Pesa processing, escrow and independent credential verification are not implemented.
+Only a provider-confirmed status marks a checkout paid. Publishing does not guarantee employment.
 
 ## Access, authorship and licence
 
@@ -123,3 +138,4 @@ notices. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md),
 
 Keep API keys, passwords, PINs, recovery phrases and private customer data out of
 source, issues and shared screenshots.
+

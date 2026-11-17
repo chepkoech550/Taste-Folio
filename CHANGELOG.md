@@ -1,5 +1,13 @@
 # Changelog
 
+## Public offer Lightning checkout
+
+- Added an optional exact USD price and Pay with Lightning for published offers using Flash receiving addresses.
+- Added validated invoice QR/wallet checkout, expiry display and provider-confirmed payment status.
+- Bound price and recipient server-side to published offers and saved immutable R2 payment records with idempotent creation.
+- Added price/recipient tampering, checksum/network/expiry, retry and payment-state tests.
+- Existing prices are unchanged; funded settlement remains untested.
+
 ## USD Cash Wallet invoice pilot
 
 - Added an explicitly selected USD 1.00 private Lightning invoice test, settling to the pilot recipient’s USD wallet.

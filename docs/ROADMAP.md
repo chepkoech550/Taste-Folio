@@ -1,6 +1,6 @@
 # MVP roadmap
 
-Updated 16 November 2026. The next goal is one complete pitch, offer and enquiry journey followed
+Updated 17 November 2026. The next goal is one complete pitch, offer and enquiry journey followed
 by a verified client Bitcoin payment or tip. Keep one active coding task at a time.
 
 ## Completed or reported
@@ -10,7 +10,11 @@ by a verified client Bitcoin payment or tip. Keep one active coding task at a ti
 - [x] Supabase authentication connected.
 - [x] Signup origin bug fixed and corrected header verified live.
 - [x] Owner reports successful profile creation.
-- [x] Value-first pitch and up to three offers implemented.\n- [x] Offer-specific enquiries, server-rendered discovery and legacy service compatibility implemented.\n- [x] Local auth and expanded integration checks pass.\n- [x] Published QR SVG downloads and business-card print layout added and deployed.\n- [x] Optional tipping action uses existing receiving details without adding a payment backend.
+- [x] Value-first pitch and up to three offers implemented.
+- [x] Offer-specific enquiries, server-rendered discovery and legacy service compatibility implemented.
+- [x] Local auth and expanded integration checks pass.
+- [x] Published QR SVG downloads and business-card print layout added and deployed.
+- [x] Optional tipping action uses existing receiving details without adding a payment backend.
 - [x] Public Flash BTC invoice failure investigated and documented.
 
 These completion marks identify the evidence above. They do not replace the
@@ -19,12 +23,12 @@ remaining production acceptance checks.
 ## P0: mentor and Flash access
 
 - [ ] Give the mentor access to the private repository.
-- [ ] Obtain an authenticated Flash API key and matching environment account.
-- [ ] Confirm BTC settlement and the supported authenticated invoice operation.
+- [x] Create a Flash API key and verify wallet access.
+- [x] Establish the BTC rejection and explicitly choose USD Cash Wallet settlement.
 - [ ] Confirm why both supplied endpoints report mainnet.
 - [ ] Verify required scopes and the receiving wallet for each professional.
 
-Done when one authorised BTC invoice can be generated with its amount, recipient,
+A live unpaid USD invoice was generated; confirm the production receiving flow with its amount, recipient,
 currency, network and expiry verified. [Investigation](FLASH.md).
 
 ## P0: verify the portfolio live
@@ -40,15 +44,14 @@ them, and accounts remain isolated.
 
 ## P0: implement client payments or tips
 
-- [ ] Create one invoice for a clearly agreed amount credited to the professional.
-- [ ] Store the recipient and payment attempt server-side.
-- [ ] Show QR/invoice and a supported wallet action.
-- [ ] Confirm PAID only from the provider.
-- [ ] Handle unpaid, expired, failed and duplicate requests.
+- [x] Create one invoice for a clearly agreed amount credited to the professional. (Implemented; local tests.)
+- [x] Store the recipient and payment attempt server-side. (Implemented; local tests.)
+- [x] Show QR/invoice and a supported wallet action. (Implemented; local tests.)
+- [x] Confirm PAID only from the provider. (Implemented; local tests.)
+- [x] Handle unpaid, expired, failed and duplicate requests. (Implemented; local tests.)
 - [ ] Run an explicitly agreed funded demonstration on the verified network.
 
-This work is not implemented yet. It depends on the access and BTC operation
-checks above. Platform-funded rewards and payouts are a separate future flow.
+USD checkout is implemented; a funded production test remains outstanding. Platform-funded rewards and payouts are a separate future flow.
 
 ## P0: three-user pilot
 
@@ -71,3 +74,4 @@ checks above. Platform-funded rewards and payouts are a separate future flow.
 
 Messaging, reviews, rankings, scheduling, hiring algorithms, automated M-Pesa
 processing, escrow, wallet custody and independent credential verification.
+

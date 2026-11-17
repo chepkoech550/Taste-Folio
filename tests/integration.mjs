@@ -3,6 +3,8 @@ import { unstable_getMiniflareWorkerOptions } from 'wrangler';
 import { dirname,resolve } from 'node:path';
 import { readFileSync,readdirSync } from 'node:fs';
 import assert from 'node:assert/strict';
+import bolt11 from 'bolt11';
+const checkoutInvoice=bolt11.sign(bolt11.encode({satoshis:1000,timestamp:Math.floor(Date.now()/1000),tags:[{tagName:'payment_hash',data:'b'.repeat(64)},{tagName:'description',data:'Checkout fixture'},{tagName:'expire_time',data:300}]}),'1'.repeat(64)).paymentRequest;
 const fetchMock=createFetchMock();fetchMock.disableNetConnect();
 const authPool=fetchMock.get('https://test-project.supabase.co');
 for(const [token,id,email] of [['qa-owner','qa-portfolio-owner','qa@example.test'],['qa-other','qa-other','other@example.test'],['qa-legacy','qa-legacy','legacy@example.test']]) authPool.intercept({path:'/auth/v1/user',method:'GET',headers:{authorization:'Bearer '+token}}).reply(200,{id,email}).persist();
@@ -21,8 +23,11 @@ for (const [operation,data] of [
 ]) {
  const mock=flashPool.intercept({path:'/graphql',method:'POST',headers:{'x-api-key':'fk_integration_fixture'}}).reply(200,{data});
  if(operation==='status')mock.times(2);
- if(operation==='usd-status')mock.persist();
+ if(operation==='usd-status')mock.times(2);
 }
+flashPool.intercept({path:'/graphql',method:'POST',headers:{'x-api-key':'fk_integration_fixture'}}).reply(200,{data:{recipient:{id:'checkout-usd',walletCurrency:'USD'},globals:{network:'mainnet'}}});
+flashPool.intercept({path:'/graphql',method:'POST',headers:{'x-api-key':'fk_integration_fixture'}}).reply(200,{data:{lnUsdInvoiceCreateOnBehalfOfRecipient:{errors:[],invoice:{paymentRequest:checkoutInvoice,satoshis:null}}}});
+flashPool.intercept({path:'/graphql',method:'POST',headers:{'x-api-key':'fk_integration_fixture'}}).reply(200,{data:{lnInvoicePaymentStatus:{errors:[],status:'PAID'}}}).persist();
 const options=unstable_getMiniflareWorkerOptions('dist/server/wrangler.json');
 const rootDir=dirname(options.main);const files=readdirSync(rootDir,{recursive:true}).filter(f=>/\.m?js$/.test(f)&&f!=='index.js');const modules=['index.js',...files].map(f=>({type:'ESModule',path:resolve(rootDir,f)}));const mf=new Miniflare({...options.workerOptions,modules,modulesRoot:rootDir,cf:false,fetchMock,bindings:{...options.workerOptions.bindings,SUPABASE_URL:'https://test-project.supabase.co',SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test',FLASH_API_URL:'https://api.flashapp.me/graphql',FLASH_API_KEY:'fk_integration_fixture'}});
 try{
@@ -104,6 +109,31 @@ try{
  assert(privateRecord);assert((await privateRecord.json()).paymentRequest==='lnbc210n1fixture');
  const usdRecord=await bucket.get('internal/flash-invoice-test/usd/qa-portfolio-owner.json');
  assert(usdRecord);assert((await usdRecord.json()).paymentRequest==='lnbc10u1fixture');
+ // Public offer checkout: immutable published price/recipient, no buyer login, exact origin.
+ const checkoutProfile={...p,lightning:'boodaboo@flashapp.me',offers:[{...p.offers[0],usdPrice:'25.50'}]};
+ assert.equal((await call('/api/portfolio','POST',{profile:{...checkoutProfile,lightning:''},action:'publish'},identity)).r.status,400);
+ const publishedCheckout=await call('/api/portfolio','POST',{profile:checkoutProfile,action:'publish'},identity);
+ assert.equal(publishedCheckout.r.status,200,JSON.stringify(publishedCheckout.value));
+ const checkoutSlug=publishedCheckout.value.slug;
+ const publicCheckoutPage=await mf.dispatchFetch(root+'/p/'+checkoutSlug);
+ assert((await publicCheckoutPage.text()).includes('Pay with Lightning'));
+ const checkoutId='12345678-1234-4123-8123-123456789abc';
+ const checkoutInput={id:checkoutId,slug:checkoutSlug,offerId:'offer-1',amount:1,recipient:'attacker'};
+ assert.equal((await call('/api/checkout','POST',checkoutInput,{Origin:'https://other.example'})).r.status,403);
+ assert.equal((await call('/api/checkout','POST',{...checkoutInput,slug:'missing'},{Origin:root})).r.status,404);
+ const checkoutCreated=await call('/api/checkout','POST',checkoutInput,{Origin:root});
+ assert.equal(checkoutCreated.r.status,200,JSON.stringify(checkoutCreated.value));
+ assert.equal(checkoutCreated.value.checkout.stage,'ready',JSON.stringify(checkoutCreated.value));
+ assert.equal(checkoutCreated.value.checkout.usdCents,2550);assert.equal(checkoutCreated.value.checkout.recipient,'boodaboo@flashapp.me');
+ assert.equal((await call('/api/checkout','POST',checkoutInput,{Origin:root})).value.checkout.paymentRequest,checkoutInvoice);
+ const paidCheckout=await call('/api/checkout/'+checkoutId);
+ assert.equal(paidCheckout.value.checkout.paymentStatus,'PAID',JSON.stringify(paidCheckout.value));
+ assert.equal((await call('/api/checkout/not-a-valid-id')).r.status,404);
+ assert.equal((await call('/api/checkout/12345678-1234-4123-8123-123456789abd')).r.status,404);
+ await call('/api/portfolio','POST',{profile:{...checkoutProfile,offers:[{...checkoutProfile.offers[0],usdPrice:'50'}]},action:'draft'},identity);
+ assert.equal((await call('/api/checkout','POST',checkoutInput,{Origin:root})).value.checkout.usdCents,2550);
+ await call('/api/portfolio','POST',{profile:checkoutProfile,action:'unpublish'},identity);
+ assert.equal((await call('/api/checkout','POST',{...checkoutInput,id:'12345678-1234-4123-8123-123456789abd'},{Origin:root})).r.status,404);
  console.log('Passed: auth, origin checks, publish validation, drafts, published snapshots, owner isolation, SSR portfolios, image upload/access, unpublishing, tipping validation, offer validation and enquiry links, legacy service compatibility, server-rendered discovery, performer actions, public card snapshot boundaries and unsafe-link rejection.');
 }finally{await mf.dispose()}
 
