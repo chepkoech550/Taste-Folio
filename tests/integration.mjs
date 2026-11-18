@@ -75,6 +75,30 @@ try{
  const file=new File([Uint8Array.from(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aXioAAAAASUVORK5CYII=','base64'))],'pixel.png',{type:'image/png'});let form=new FormData();form.append('file',file);const uploadRequest=new Request(root+'/api/upload',{method:'POST',headers:identity,body:form});let uploaded=await mf.dispatchFetch(root+'/api/upload',{method:'POST',headers:Object.fromEntries(uploadRequest.headers),body:await uploadRequest.arrayBuffer()});let uploadResult=await uploaded.json();assert.equal(uploaded.status,200,JSON.stringify(uploadResult));let {url}=uploadResult;assert.equal((await mf.dispatchFetch(root+url)).status,404);assert.equal((await mf.dispatchFetch(root+url,{headers:identity})).status,200);
  assert.equal((await call('/api/portfolio','POST',{profile:{...p,avatar:url},action:'publish'},otherIdentity)).r.status,400);
  p.projects[0].image=url;assert.equal((await call('/api/portfolio','POST',{profile:p,action:'publish'},identity)).r.status,200);assert.equal((await mf.dispatchFetch(root+url)).status,200);
+ // Multi-photo drafts remain private until publish, with the same ownership checks as legacy photos.
+ const newPhotos=[];
+ for(let i=0;i<4;i++){
+  const data=new FormData();data.append('file',file);
+  const request=new Request(root+'/api/upload',{method:'POST',headers:identity,body:data});
+  const result=await mf.dispatchFetch(request.url,{method:'POST',headers:Object.fromEntries(request.headers),body:await request.arrayBuffer()});
+  assert.equal(result.status,200);
+  newPhotos.push((await result.json()).url);
+ }
+ const gallery={...p,offers:[{...p.offers[0],images:newPhotos.slice(0,3)}],projects:[{...p.projects[0],images:[url,newPhotos[3]]}]};
+ const saveGallery=(profile,action='draft',headers=identity)=>call('/api/portfolio','POST',{profile,action},headers);
+ assert.equal((await saveGallery({...gallery,offers:[{...gallery.offers[0],images:newPhotos}]})).r.status,400);
+ assert.equal((await saveGallery({...gallery,projects:[{...gallery.projects[0],images:[url,...newPhotos]}]})).r.status,400);
+ assert.equal((await saveGallery({...gallery,projects:p.projects.map(project=>({...project,image:''}))},'draft',otherIdentity)).r.status,400);
+ assert.equal((await saveGallery(gallery)).r.status,200);
+ for(const photo of newPhotos)assert.equal((await mf.dispatchFetch(root+photo)).status,404);
+ assert.equal((await saveGallery(gallery,'publish')).r.status,200);
+ const galleryHtml=await (await mf.dispatchFetch(root+'/p/'+slug)).text();
+ for(const photo of newPhotos){
+  assert(galleryHtml.includes('src="'+photo+'"'));
+  assert.equal((await mf.dispatchFetch(root+photo)).status,200);
+ }
+ assert.equal((await saveGallery({...gallery,offers:[{...gallery.offers[0],images:[]}],projects:[{...gallery.projects[0],images:[]}]},'publish')).r.status,200);
+ for(const photo of [url,...newPhotos])assert.equal((await mf.dispatchFetch(root+photo)).status,404);
  await call('/api/portfolio','POST',{profile:p,action:'unpublish'},identity);assert(!(await call('/api/profiles')).value.profiles.some(x=>x.slug===slug));assert.equal((await mf.dispatchFetch(root+url)).status,404);
  assert.equal((await mf.dispatchFetch(root+'/p/'+slug+'/card')).status,404);
  assert.equal((await call('/api/portfolio','POST',{profile:{...p,acceptTips:true},action:'publish'},identity)).r.status,400);

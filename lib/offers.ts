@@ -1,5 +1,5 @@
 import type {Portfolio} from './portfolio';
-export type Offer={id:string;title:string;description:string;price:string;usdPrice?:string};
+export type Offer={id:string;title:string;description:string;price:string;usdPrice?:string;images?:string[]};
 // An absent offers field identifies an older record. An explicit empty array
 // means the owner removed all offers; never silently resurrect a legacy service.
 export function offersFor(p:Portfolio):Offer[]{
