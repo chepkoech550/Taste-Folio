@@ -23,7 +23,7 @@ Updated 17 November 2026. This is a hackathon MVP in active development.
 | --- | --- |
 | Cloudflare hosting | Deployment reported Ready; account pages were independently loaded |
 | D1 database and R2 uploads bucket | Created; initial database tables applied successfully |
-| Supabase authentication | Connected; signup origin error fixed; owner reports creating a profile |
+| Supabase authentication | Sign-in/signup, Show/Hide password and Forgot password implemented; general-user signup and real email delivery still need SMTP/configuration verification |
 | Portfolio editor and publication | Implemented; draft, publication and ownership flows pass isolated integration tests |
 | Project evidence and skills | Implemented; existing background records retained; separate experience/education entry forms removed |
 | Pitch and up to three specific offers | Implemented, with title, benefit/scope and optional price |
@@ -90,7 +90,7 @@ uses verified Supabase sessions. Keep mock authentication local.
 npm run check
 ```
 
-This runs TypeScript checks, a production build, 34 unit tests and Worker integration tests. Tests use isolated storage and simulated auth and Flash providers. See [paid work](docs/WORK.md) and [Nostr](docs/NOSTR.md) for the new flows and their limits.
+This runs TypeScript checks, a production build, 42 unit tests and Worker integration tests. Tests use isolated storage and simulated auth and Flash providers. See [paid work](docs/WORK.md) and [Nostr](docs/NOSTR.md) for the new flows and their limits.
 
 ## Find your way around
 

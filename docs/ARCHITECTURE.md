@@ -71,6 +71,9 @@ access on subsequent requests.
 | `/p/[slug]/card` | QR download and business-card printing | Published snapshot only; unpublished returns 404 |
 | `/auth/sign-in`, `/auth/sign-up` | Account forms | Public; POST requires origin and CSRF checks |
 | `/auth/sign-out` | Sign out confirmation | POST clears session |
+| `/auth/forgot-password` | Request recovery email | Exact origin and CSRF protected POST |
+| `/auth/callback` | Exchange browser-bound recovery code | S256 PKCE verifier required |
+| `/auth/reset-password` | Set matching new password | Separate verified recovery token, origin and CSRF |
 | `/signin-with-chatgpt` | Legacy sign in link | Routed to standalone account flow in production |
 | `GET /api/portfolio` | Owner's draft and publication state | Signed-in owner |
 | `POST /api/portfolio` | Save, publish or unpublish | Signed-in owner and origin check |

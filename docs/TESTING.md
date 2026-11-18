@@ -111,3 +111,12 @@ separately reports a confirmed USD 1.00 offer payment. Check Cash Wallet credit
 and perform a consenting live two-account milestone demo before claiming funded
 milestone settlement. A real NIP-07 signer and relay acknowledgement also need a
 live demonstration. Automated tests use simulated auth and provider responses.
+
+## Account access update, 18 November 2026
+
+Eight additional auth tests cover nonce-protected visibility scripts, actionable
+provider errors, S256 challenge/verifier binding, short-lived cookies, CSRF/origin
+rejection, invalid callbacks, password matching/strength, verified password update
+and separation from normal app access. Total unit tests: 42. No production account
+was created or password changed by the assistant. SMTP delivery and callback URL
+configuration must be verified with the owner. See docs/CLOUDFLARE.md.

@@ -22,7 +22,8 @@ sign in displays a setup message and all account writes remain protected.
 1. Create a Supabase project. Portfolio records and uploads stay in Cloudflare.
 2. In Supabase Authentication URL Configuration, set Site URL to
    `https://taste-folio.violakorir24.workers.dev` and allow the redirect URL
-   `https://taste-folio.violakorir24.workers.dev/auth/sign-in`.
+   `https://taste-folio.violakorir24.workers.dev/auth/sign-in` and
+   `https://taste-folio.violakorir24.workers.dev/auth/callback`.
 3. Obtain the Project URL and the **publishable** API key (`sb_publishable_...`).
    The Worker deliberately rejects secret/service-role and legacy keys.
 4. In Cloudflare Worker settings, configure runtime values `SUPABASE_URL` and
@@ -46,8 +47,8 @@ identity headers are removed before setting any provider-verified identity.
 Responses bypass shared caching. Sign out clears browser cookies and attempts
 provider session revocation; existing access tokens follow provider expiry rules.
 
-Authentication tests use a simulated provider. The owner reported successful\nprofile creation after configuration. Email delivery, refresh and two-account\nisolation still need broader live acceptance tests. Password recovery UI and CAPTCHA are not implemented. Before
-broader launch, add those and review auth rate limits and SMTP capacity.
+Authentication tests use a simulated provider. The owner reported successful\nprofile creation after configuration. Email delivery, refresh and two-account\nisolation still need broader live acceptance tests. Forgot password, browser-bound recovery and password visibility controls are implemented.
+CAPTCHA integration is not implemented. Review auth rate limits and SMTP capacity.
 
 No extra D1 migration is required for authentication. Supabase supplies stable
 user IDs for the existing owner_id columns. No portfolios existed on the new D1
@@ -62,3 +63,38 @@ names. The current application does not read them yet. Adding them alone will
 not enable payments. No Flash API key has been supplied or configured in this work.
 Authenticate with a key for the matching Flash environment and implement the
 server integration only after verifying BTC operation support. [Flash evidence](FLASH.md).
+
+
+## Signup and recovery support, 18 November 2026
+
+1. In Supabase Authentication, confirm email/password signup is enabled.
+2. Configure custom SMTP under Authentication > Email > SMTP settings. The built-in
+   provider sends only to project-team addresses and has a low sending limit.
+   Keep confirmation enabled. Credentials belong in Supabase, never this repository.
+3. Add the exact production /auth/callback URL above to Authentication > URL
+   Configuration > Redirect URLs. Preserve the existing /auth/sign-in entry and
+   production Site URL. Default confirmation and password recovery email templates
+   using ConfirmationURL support this flow; PKCE recovery needs its code redirect.
+4. On a consenting test account, verify signup email delivery and confirmation.
+   Then choose Forgot password, request a reset email and open it in the same
+   browser within 15 minutes. Set the password yourself; never share it with support.
+5. Confirm the updated password signs in, and old/expired reset links fail.
+
+The code now maps provider error codes to safe explanations. AUTH_EMAIL_SETUP
+indicates default SMTP recipient restrictions; AUTH_EMAIL_LIMIT indicates sending
+limits; AUTH_SIGNUP_DISABLED identifies disabled signup. Unknown provider details
+and passwords are not reflected. Cloudflare logs record only action, status and
+allowlisted error code, with no email, password or token.
+
+Reset uses a random S256 PKCE verifier in a short-lived Secure HttpOnly cookie.
+The callback exchanges the one-time code, verifies the user and stores a separate
+recovery-only token. It never grants portfolio access. Updating the password
+requires origin/CSRF checks, matching passwords and a provider-verified recovery
+session, then clears the local session and returns to sign in. The callback strips
+the code from the URL with a no-referrer redirect. No D1 or new secret is needed.
+
+Without access to the private Supabase dashboard or an actual failing response,
+SMTP is a likely cause rather than a confirmed diagnosis. Automated auth checks
+simulate provider responses; real mail delivery remains an owner-run check.
+
+Reference: https://supabase.com/docs/guides/auth/auth-smtp

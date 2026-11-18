@@ -84,7 +84,7 @@ Cookies are Secure, HttpOnly and host-only. Account forms require origin and CSR
 checks. Session renewal is server-side.
 
 Review two-account isolation, session expiry, email delivery and the production
-configuration. Password recovery UI and CAPTCHA are not implemented.
+configuration. Password recovery and Show/Hide password are implemented; CAPTCHA integration remains deferred.
 
 ### 3. Verify the pitch and offer journey live
 
@@ -125,3 +125,12 @@ Record fixes and test evidence in a focused branch or pull request. Help select 
 project licence and confirm the organisers' current submission requirements
 before tagging the final release.
 
+
+## Account access update, 18 November 2026
+
+Signup now distinguishes SMTP recipient restrictions, email sending limits,
+disabled signup and password rules. Forgot password uses S256 PKCE and a separate
+short-lived recovery session. Sign-in, signup and reset forms have accessible
+Show/Hide controls. See docs/CLOUDFLARE.md for the SMTP and callback allowlist steps.
+A real signup failure and end-to-end email delivery still require private provider
+configuration or a consenting tester's returned error; no settings were weakened.
