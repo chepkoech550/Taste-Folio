@@ -1,23 +1,34 @@
 # Taste Folio
 
-**Get paid for your skills.**
+Taste Folio helps independent professionals earn extra income from their skills and helps buyers with limited budgets find skilled help for a defined task. Professionals publish a shareable pitch with work samples and up to three offers. Buyers can pay for an existing offer or post a brief, select a professional and agree on the scope and price of up to three milestones.
 
-Taste Folio connects people who can deliver with people who need work done.
-Professionals publish a pitch, specific offers and evidence. Buyers can book an
-existing offer or post paid work, select a professional and agree up to three
-milestones. Delivery stays private; Flash confirms Lightning payments into the
-professional's USD Cash Wallet. Optional Nostr identity lets professionals sign
-and share a public talent listing.
+Built by **Viola Kipkorir** for the Satoshi Sister Circle Sovereign Stack Hackathon.
 
-Use cases: an indoor plant stylist, a lash stylist, a fashion designer and a street saxophonist.
-Product direction: Viola Kipkorir. Visual identity: maroon and gold.
+**[Try the live app](https://taste-folio.violakorir24.workers.dev/) · [Demo guide](docs/DEMO.md) · [Architecture](docs/ARCHITECTURE.md)**
 
-**[Open the Cloudflare app](https://taste-folio.violakorir24.workers.dev/) ·
-[Mentor: start here](MENTOR.md) · [Flash investigation](docs/FLASH.md)**
+## Hackathon demo
+
+1. Open the live app and browse the published talent listings. The demo uses Viola's real indoor plant styling offers and published work from an AfriBit Kibera contributor.
+2. Open the office plant consultation offer to see what the buyer gets and what it costs.
+3. Follow the **Pay with Lightning** flow to see the invoice and payment status. Flash confirmed one USD 1.00 offer payment during testing, as reported by the builder. The receiving Cash Wallet credit has yet to be independently verified.
+
+The paid-work flow covers buyer briefs, applications, milestone agreements, private delivery and payment after approval. It was tested with simulated payment responses. Optional Nostr publishing lets a professional sign a public talent listing. Live milestone settlement and live Nostr signer and relay testing remain pending.
+
+## Tech stack
+
+| Component | Role |
+| --- | --- |
+| React, TypeScript and Vinext | App interface, server rendering and routes |
+| Cloudflare Workers | Runs the deployed app |
+| Cloudflare D1 | Stores portfolios, publication snapshots and work records |
+| Cloudflare R2 | Stores uploaded images and private payment records |
+| Supabase Auth | Email sign-in and session management |
+| Flash and Bitcoin Lightning | USD-priced recipient invoices and payment confirmation |
+| Nostr | Optional signed public talent listings |
 
 ## Current status
 
-Updated 17 November 2026. This is a hackathon MVP in active development.
+Updated 18 November 2026. This is a hackathon MVP in active development.
 
 | Area | Current evidence |
 | --- | --- |
@@ -134,7 +145,7 @@ The repository is private as checked on 16 November 2026. Invite a mentor as a
 collaborator before sharing code links. Website access and repository visibility
 are separate.
 
-OpenAI ChatGPT/Codex assisted with design, implementation and debugging. A licence
+OpenAI Codex assisted with implementation and debugging. ChatGPT assisted with product design and drafting hackathon materials. Viola directed the product and design decisions. A licence
 for original project code is still pending; retain all dependency and starter
 notices. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md),
 [SECURITY.md](SECURITY.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
